@@ -9,7 +9,7 @@ public class ControlBar extends ToolBar {
 		getItems().addAll(
 				new Button("\u25B6"),
 				new Button("ll"),
-				new Button("\u25FE")
+				new Button("\u25FC")
 				);	
 	}
 }

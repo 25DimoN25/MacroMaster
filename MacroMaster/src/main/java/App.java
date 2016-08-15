@@ -1,50 +1,60 @@
-import gui.CommandList;
+
+
+import gui.CommandListTab;
 import gui.ControlBar;
 import gui.MainMenu;
 import gui.StatusBar;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
-import javafx.scene.control.Tab;
+import javafx.scene.control.Label;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class App extends Application {
 
-	public static void main(String[] args) {
-		launch(args);
-	}
+	private TabPane inprogramCommandLists;
+	private MainMenu menu;
+	private StatusBar status;
+	
+
+	private long newMacrosId = 1L;
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		
 		BorderPane rootPane = new BorderPane();
-		
-			
 
-		TabPane inprogramCommandLists = new TabPane();
-		inprogramCommandLists.getTabs().addAll(
-				new Tab("1st prog", new CommandList()),
-				new Tab("2st prog", new CommandList()),
-				new Tab("3st prog", new CommandList())
-				);	
-		
-		rootPane.setCenter(inprogramCommandLists);
+		inprogramCommandLists = new TabPane();
 		
 		
-		MainMenu menu = new MainMenu();
+		menu = new MainMenu();
+		menu.setOnActionNew(e -> {
+			inprogramCommandLists.getTabs().add(new CommandListTab("New macros " + newMacrosId));
+			newMacrosId++;
+		});
+		menu.setOnActionExit(e -> Platform.exit());
+		
 		ControlBar controls = new ControlBar();	
+	
+		status = new StatusBar();
+
+		
+		rootPane.setCenter(new StackPane(new Label("Press File -> New"), inprogramCommandLists));
 		rootPane.setTop(new VBox(menu, controls));
-		
-		
-		StatusBar status = new StatusBar();
-		rootPane.setBottom(status);
-		
+		rootPane.setBottom(status);	
 		
 		primaryStage.setScene(new Scene(rootPane, 500, 500));
 		primaryStage.setTitle("MacroMaster");
 		primaryStage.show();
 	}
 
+	
+	public static void main(String[] args) {
+		launch(args);
+	}
+	
 }
