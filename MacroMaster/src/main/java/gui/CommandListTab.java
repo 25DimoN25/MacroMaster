@@ -1,52 +1,50 @@
 package gui;
 
 import command.Command;
+import command.CommandType;
+import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
 import javafx.scene.control.Tab;
+import javafx.scene.control.TableView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 
 //TODO
 public class CommandListTab extends Tab {
 	
-	private ListView<Command> commands = new ListView<>();
+	private TableView<Command> commands = new CommandList();
+	private TableView<Command> newCommand = new CommandList();
 	private Button addCommand = new Button("add command");
 	
 	public CommandListTab(String title) {
-		VBox content = new VBox();
+		VBox content = new VBox(3);
 		content.setAlignment(Pos.CENTER);
+
+		newCommand.setPrefHeight(27);
+		newCommand.setMinHeight(27);
+		newCommand.setMaxHeight(27);
 		
-		commands.setPrefHeight(Integer.MAX_VALUE);
-		commands.setCellFactory(e -> new CustomListCell());
-		commands.getItems().addAll(
-				Command.moveTo(10, 80),
-				Command.moveTo(68, 546),
-				Command.moveTo(13, 213),
-				Command.moveTo(456, 321),
-				Command.moveTo(322, 1020)
-				);
+		newCommand.widthProperty().addListener((obs, o, n) -> {
+			Pane header = (Pane) newCommand.lookup("TableHeaderRow");
+			if (header != null && header.isVisible()) {
+				header.setMaxHeight(0);
+				header.setMinHeight(0);
+				header.setPrefHeight(0);
+				header.setVisible(false);
+			}
+		});
+		newCommand.getItems().add(new Command(CommandType.CLICK, KeyCode.CONTROL, MouseButton.PRIMARY, new Point2D(10, 10), 1, 0));
 		
-		
-		
-		
-		
-		content.getChildren().addAll(commands, addCommand);
+		content.getChildren().addAll(commands, newCommand, addCommand);
 		setContent(content);
 		setText(title);
 	}
 	
-}
-
-
-class CustomListCell extends ListCell<Command> {
-    @Override
-    public void updateItem(Command item, boolean empty) {
-		super.updateItem(item, empty);
-
-		if (item != null) {
-			setText(item.getDescription());
-		}
+	public TableView<Command> getCommands() {
+		return commands;
 	}
+	
 }

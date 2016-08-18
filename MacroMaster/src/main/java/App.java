@@ -1,5 +1,4 @@
-
-
+import command.Command;
 import gui.CommandListTab;
 import gui.ControlBar;
 import gui.MainMenu;
@@ -9,6 +8,7 @@ import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TabPane;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -16,10 +16,9 @@ import javafx.stage.Stage;
 
 public class App extends Application {
 
-	private TabPane inprogramCommandLists;
+	private TabPane scriptTabs;
 	private MainMenu menu;
 	private StatusBar status;
-	
 
 	private long newMacrosId = 1L;
 
@@ -28,26 +27,40 @@ public class App extends Application {
 		
 		BorderPane rootPane = new BorderPane();
 
-		inprogramCommandLists = new TabPane();
-		
+		scriptTabs = new TabPane();
+		rootPane.setCenter(new StackPane(new Label("Press File -> New"), scriptTabs));
 		
 		menu = new MainMenu();
 		menu.setOnActionNew(e -> {
-			inprogramCommandLists.getTabs().add(new CommandListTab("New macros " + newMacrosId));
+			CommandListTab tab = new CommandListTab("New macros " + newMacrosId);		
+			scriptTabs.getTabs().add(tab);
 			newMacrosId++;
 		});
 		menu.setOnActionExit(e -> Platform.exit());
 		
 		ControlBar controls = new ControlBar();	
+		controls.setOnActionPlay(e -> {
+			CommandListTab currentTab = (CommandListTab) scriptTabs.getSelectionModel().getSelectedItem();
+			for (Command command : currentTab.getCommands().getItems()) {
+				command.useCommand();
+			}
+		});
+		controls.setOnActionPause(e -> {
+			System.out.println("pause pressed");
+		});
+		controls.setOnActionStop(e -> {
+			System.out.println("stop pressed");
+		});
+		
+		rootPane.setTop(new VBox(menu, controls));
 	
-		status = new StatusBar();
+		
+		status = new StatusBar();	
+		rootPane.setBottom(status);	
 
 		
-		rootPane.setCenter(new StackPane(new Label("Press File -> New"), inprogramCommandLists));
-		rootPane.setTop(new VBox(menu, controls));
-		rootPane.setBottom(status);	
-		
-		primaryStage.setScene(new Scene(rootPane, 500, 500));
+		Scene scene = new Scene(rootPane, 500, 500);
+		primaryStage.setScene(scene);	
 		primaryStage.setTitle("MacroMaster");
 		primaryStage.show();
 	}
