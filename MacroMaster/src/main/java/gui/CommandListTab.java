@@ -18,15 +18,16 @@ public class CommandListTab extends Tab {
 	private TableView<Command> commands = new CommandList();
 	private TableView<Command> newCommand = new CommandList();
 	private Button addCommand = new Button("add command");
+	private Command blankCommand = new Command(CommandType.CLICK, KeyCode.CONTROL, MouseButton.PRIMARY, new Point2D(10, 10), 1, 0);
+	
 	
 	public CommandListTab(String title) {
 		VBox content = new VBox(3);
 		content.setAlignment(Pos.CENTER);
 
-		newCommand.setPrefHeight(27);
-		newCommand.setMinHeight(27);
-		newCommand.setMaxHeight(27);
-		
+		newCommand.setPrefHeight(32);
+		newCommand.setMinHeight(32);
+		newCommand.setMaxHeight(32);
 		newCommand.widthProperty().addListener((obs, o, n) -> {
 			Pane header = (Pane) newCommand.lookup("TableHeaderRow");
 			if (header != null && header.isVisible()) {
@@ -36,11 +37,18 @@ public class CommandListTab extends Tab {
 				header.setVisible(false);
 			}
 		});
-		newCommand.getItems().add(new Command(CommandType.CLICK, KeyCode.CONTROL, MouseButton.PRIMARY, new Point2D(10, 10), 1, 0));
+		newCommand.getItems().add((Command) blankCommand.clone());
 		
 		content.getChildren().addAll(commands, newCommand, addCommand);
 		setContent(content);
 		setText(title);
+		
+		addCommand.setOnAction(e -> {
+			Command command = newCommand.getItems().get(0);
+			commands.getItems().add(command);
+			newCommand.getItems().clear();
+			newCommand.getItems().add((Command) blankCommand.clone());
+		});
 	}
 	
 	public TableView<Command> getCommands() {

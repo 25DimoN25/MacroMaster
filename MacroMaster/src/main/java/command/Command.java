@@ -7,9 +7,9 @@ import javafx.geometry.Point2D;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 
-public class Command {
+public class Command implements Cloneable {
 
-	private final BaseRobot ROBOT = new BaseRobotImpl(); 
+	private BaseRobot ROBOT = new BaseRobotImpl(); 
 	private CommandType type;
 	private KeyCode key;
 	private MouseButton mbutton;
@@ -33,20 +33,40 @@ public class Command {
 		return type;
 	}
 	
+	public void setType(CommandType type) {
+		this.type = type;
+	}
+	
 	public KeyCode getKey() {
 		return key;
 	}
 	
+	public void setKey(KeyCode key) {
+		this.key = key;
+	}
+	
 	public MouseButton getMButton() {
 		return mbutton;
+	}
+	
+	public void setMButton(MouseButton mbutton) {
+		this.mbutton = mbutton;
 	}
 
 	public Point2D getCoordinates() {
 		return coordinates;
 	}
 	
+	public void setCoordinates(Point2D coordinates) {
+		this.coordinates = coordinates;
+	}
+	
 	public Integer getCount() {
 		return count;
+	}
+	
+	public void setCount(Integer count) {
+		this.count = count;
 	}
 	
 	public Integer getDelay() {
@@ -64,8 +84,15 @@ public class Command {
 		}
 	}
 
-
-
-
+	@Override
+	public Object clone() {
+		return new Command(getType(), getKey(), getMButton(), getCoordinates(), getCount(), getDelay());
+	}
+	
+	@Override
+	public String toString() {
+		return this.getClass().getName() + "[" + getType() + ", " + getKey() + ", " + getMButton() + ", "
+				+ getCoordinates() + ", " + getCount() + ", " + getDelay() + "]";
+	}
 
 }

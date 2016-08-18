@@ -8,7 +8,6 @@ import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TabPane;
-import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -42,7 +41,7 @@ public class App extends Application {
 		controls.setOnActionPlay(e -> {
 			CommandListTab currentTab = (CommandListTab) scriptTabs.getSelectionModel().getSelectedItem();
 			for (Command command : currentTab.getCommands().getItems()) {
-				command.useCommand();
+				System.out.println("Using: " + command);
 			}
 		});
 		controls.setOnActionPause(e -> {
@@ -59,7 +58,7 @@ public class App extends Application {
 		rootPane.setBottom(status);	
 
 		
-		Scene scene = new Scene(rootPane, 500, 500);
+		Scene scene = new Scene(rootPane, 600, 500);
 		primaryStage.setScene(scene);	
 		primaryStage.setTitle("MacroMaster");
 		primaryStage.show();
