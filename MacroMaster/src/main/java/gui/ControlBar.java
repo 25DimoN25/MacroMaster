@@ -15,6 +15,8 @@ public class ControlBar extends ToolBar {
 	private Button pause = new Button("ll");
 	private Button stop = new Button("\u25FC");
 	
+	private int currentState = STOPPED;
+	
 	public ControlBar() {
 		getItems().addAll(play, pause, stop);	
 	}
@@ -37,24 +39,30 @@ public class ControlBar extends ToolBar {
 	 * @param state use ControlBar static constants
 	 */
 	public void setState(int state) {
+		currentState = state;
 		switch (state) {
-		case PLAYING:
-			play.setDisable(true);
-			pause.setDisable(false);
-			stop.setDisable(false);
-			break;
-		case PAUSED:
-			play.setDisable(false);
-			pause.setDisable(true);
-			stop.setDisable(false);
-			break;
-		case STOPPED:
-			play.setDisable(false);
-			pause.setDisable(true);
-			stop.setDisable(true);
-			break;
-		default:
-			break;
+			case PLAYING:
+				play.setDisable(true);
+				pause.setDisable(false);
+				stop.setDisable(false);
+				break;
+			case PAUSED:
+				play.setDisable(false);
+				pause.setDisable(true);
+				stop.setDisable(false);
+				break;
+			case STOPPED:
+				play.setDisable(false);
+				pause.setDisable(true);
+				stop.setDisable(true);
+				break;
+			default:
+				break;
 		}
+
+	}
+
+	public int getState() {	
+		return currentState;
 	}
 }

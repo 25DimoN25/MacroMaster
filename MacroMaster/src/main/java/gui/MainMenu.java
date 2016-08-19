@@ -4,6 +4,7 @@ package gui;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -17,15 +18,23 @@ public class MainMenu extends MenuBar {
 	private MenuItem save = new MenuItem("Save");
 	private MenuItem saveAs = new MenuItem("Save as ...");
 	private MenuItem exit = new MenuItem("Exit");
+	private CheckMenuItem repeat = new CheckMenuItem("Repeat");
 
 	public MainMenu() {
 		
 
-		getMenus().add(new Menu("File", null,
-					neww, new SeparatorMenuItem(), open, 
-					new SeparatorMenuItem(), save, saveAs, 
-					new SeparatorMenuItem(), exit
-				));
+		getMenus().addAll(
+				new Menu("File", null,
+					neww,
+					new SeparatorMenuItem(),
+					open, 
+					new SeparatorMenuItem(),
+					save,
+					saveAs, 
+					new SeparatorMenuItem(),
+					exit), 
+				new Menu("Options", null,
+					repeat));
 	}
 	
 	
@@ -49,5 +58,8 @@ public class MainMenu extends MenuBar {
 		exit.setOnAction(value);
 	}
 	
-
+	public boolean isRepeat() {
+		return repeat.isSelected();
+	}
+	
 }
