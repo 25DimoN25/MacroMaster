@@ -17,6 +17,7 @@ public class Command implements Cloneable {
 	private Integer count;
 	private Integer delay;
 	
+	
 	public Command(CommandType type, KeyCode key, MouseButton mbutton, Point2D coordinates, int count,	int delay) {
 		super();
 		this.type = type;
@@ -27,8 +28,6 @@ public class Command implements Cloneable {
 		this.delay = delay;
 	}
 
-
-	
 	public CommandType getType() {
 		return type;
 	}
@@ -80,9 +79,46 @@ public class Command implements Cloneable {
 	public void useCommand() {
 		try {
 			for (int i = 0; i < count; i++) {
-				System.out.println("command used");
-				Thread.sleep(1000);
+				if (coordinates != null) {
+					ROBOT.moveMouse(coordinates);
+				}
+				
+				switch (type) {
+					case CLICK:
+						if (mbutton != null) {
+							ROBOT.pressMouse(mbutton);
+							ROBOT.releaseMouse(mbutton);
+						}
+						if (key != null) {
+							ROBOT.pressKeyboard(key);
+							ROBOT.releaseKeyboard(key);
+						}
+						break;
+					case PRESS:
+						if (mbutton != null) {
+							ROBOT.pressMouse(mbutton);
+						}
+						if (key != null) {
+							ROBOT.pressKeyboard(key);
+						}
+						break;
+					case RELEASE:
+						if (mbutton != null) {
+							ROBOT.releaseMouse(mbutton);
+						}
+						if (key != null) {
+							ROBOT.releaseKeyboard(key);
+						}
+						break;
+					default:
+						break;
+				}	
+				
+				if (delay > 0) {
+					Thread.sleep(delay);
+				}
 			}
+					
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
