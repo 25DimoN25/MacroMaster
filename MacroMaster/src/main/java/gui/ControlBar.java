@@ -65,4 +65,20 @@ public class ControlBar extends ToolBar {
 	public int getState() {	
 		return currentState;
 	}
+
+	public void fireButton(int state) {
+		switch (state) {
+		case PLAYING:
+			play.fire();
+			break;
+		case PAUSED:
+			pause.fire();
+			break;
+		case STOPPED:
+			stop.fire();
+			break;
+		default:
+			break;
+	}
+	}
 }
