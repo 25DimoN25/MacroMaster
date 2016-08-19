@@ -18,7 +18,7 @@ public class CommandListTab extends Tab {
 	private TableView<Command> commands = new CommandList();
 	private TableView<Command> newCommand = new CommandList();
 	private Button addCommand = new Button("add command");
-	private Command blankCommand = new Command(CommandType.CLICK, KeyCode.CONTROL, MouseButton.PRIMARY, new Point2D(10, 10), 1, 1000);
+	private Command blankCommand = new Command(CommandType.CLICK, KeyCode.CONTROL, MouseButton.PRIMARY, new Point2D(10, 10), 1, 100);
 	
 	
 	public CommandListTab(String title) {

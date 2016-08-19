@@ -37,6 +37,9 @@ public class App extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		
+		/*
+		 * Register hotkeys
+		 */
 		provider = Provider.getCurrentProvider(false);
 		provider.register(javax.swing.KeyStroke.getKeyStroke("control F9"), e -> {
 			Platform.runLater(() -> {
@@ -53,6 +56,14 @@ public class App extends Application {
 				controls.fireButton(ControlBar.STOPPED);
 			});
 		});
+		provider.register(javax.swing.KeyStroke.getKeyStroke("control F12"), e -> {
+			Platform.runLater(() -> {
+				provider.reset();
+				provider.stop();
+				executor.shutdown();
+				Platform.exit();
+			});
+		});
 		
 		
 		menu = new MainMenu();
@@ -64,6 +75,7 @@ public class App extends Application {
 		menu.setOnActionExit(e -> {
 			provider.reset();
 			provider.stop();
+			executor.shutdown();
 			Platform.exit();
 		});
 		
@@ -108,6 +120,7 @@ public class App extends Application {
 		primaryStage.setOnCloseRequest(e -> {
 			provider.reset();
 			provider.stop();
+			executor.shutdown();
 		});
 		primaryStage.getIcons().add(new Image("icon.png"));
 		primaryStage.show();
