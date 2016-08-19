@@ -25,6 +25,12 @@ public class CommandListTab extends Tab {
 		VBox content = new VBox(3);
 		content.setAlignment(Pos.CENTER);
 
+		commands.setOnKeyPressed(e -> {
+			if (e.getCode() == KeyCode.DELETE) {
+				commands.getItems().removeAll(commands.getSelectionModel().getSelectedItems());
+			}
+		});
+		
 		newCommand.setPrefHeight(32);
 		newCommand.setMinHeight(32);
 		newCommand.setMaxHeight(32);
@@ -38,17 +44,17 @@ public class CommandListTab extends Tab {
 			}
 		});
 		newCommand.getItems().add((Command) blankCommand.clone());
-		
-		content.getChildren().addAll(commands, newCommand, addCommand);
-		setContent(content);
-		setText(title);
-		
+				
 		addCommand.setOnAction(e -> {
 			Command command = newCommand.getItems().get(0);
 			commands.getItems().add(command);
 			newCommand.getItems().clear();
 			newCommand.getItems().add((Command) blankCommand.clone());
 		});
+		
+		content.getChildren().addAll(commands, newCommand, addCommand);
+		setContent(content);
+		setText(title);
 	}
 	
 	public TableView<Command> getCommands() {

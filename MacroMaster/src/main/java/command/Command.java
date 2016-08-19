@@ -78,9 +78,13 @@ public class Command implements Cloneable {
 	}
 
 	public void useCommand() {
-		for (int i = 0; i < count; i++) {
-			ROBOT.pressMouse(mbutton);
-			ROBOT.releaseMouse(mbutton);					
+		try {
+			for (int i = 0; i < count; i++) {
+				System.out.println("command used");
+				Thread.sleep(1000);
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -91,7 +95,7 @@ public class Command implements Cloneable {
 	
 	@Override
 	public String toString() {
-		return this.getClass().getName() + "[" + getType() + ", " + getKey() + ", " + getMButton() + ", "
+		return this.getClass().getSimpleName() + "[" + getType() + ", " + getKey() + ", " + getMButton() + ", "
 				+ getCoordinates() + ", " + getCount() + ", " + getDelay() + "]";
 	}
 

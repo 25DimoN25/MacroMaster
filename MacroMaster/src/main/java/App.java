@@ -1,3 +1,6 @@
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import command.Command;
 import gui.CommandListTab;
 import gui.ControlBar;
@@ -8,6 +11,7 @@ import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -15,7 +19,9 @@ import javafx.stage.Stage;
 
 public class App extends Application {
 
-	private TabPane scriptTabs;
+	private ExecutorService executor = Executors.newFixedThreadPool(10);
+	
+	private TabPane commandListTab;
 	private MainMenu menu;
 	private StatusBar status;
 
@@ -26,23 +32,37 @@ public class App extends Application {
 		
 		BorderPane rootPane = new BorderPane();
 
-		scriptTabs = new TabPane();
-		rootPane.setCenter(new StackPane(new Label("Press File -> New"), scriptTabs));
+		commandListTab = new TabPane();
+		rootPane.setCenter(new StackPane(new Label("Press File -> New"), commandListTab));
 		
 		menu = new MainMenu();
 		menu.setOnActionNew(e -> {
 			CommandListTab tab = new CommandListTab("New macros " + newMacrosId);		
-			scriptTabs.getTabs().add(tab);
+			commandListTab.getTabs().add(tab);
 			newMacrosId++;
 		});
 		menu.setOnActionExit(e -> Platform.exit());
 		
-		ControlBar controls = new ControlBar();	
+		
+		ControlBar controls = new ControlBar();
+		controls.setState(ControlBar.STOPPED);
 		controls.setOnActionPlay(e -> {
-			CommandListTab currentTab = (CommandListTab) scriptTabs.getSelectionModel().getSelectedItem();
-			for (Command command : currentTab.getCommands().getItems()) {
-				System.out.println("Using: " + command);
-			}
+			controls.setState(ControlBar.PLAYING);
+			CommandListTab currentTab = (CommandListTab) commandListTab.getSelectionModel().getSelectedItem();
+			TableView<Command> commands = currentTab.getCommands();
+			executor.execute(() -> {
+				for (Command command : commands.getItems()) {
+					Platform.runLater(() -> {
+						commands.getSelectionModel().clearSelection();
+						commands.getSelectionModel().select(command);	
+						status.setText("Using: " + command);
+					}); 
+					command.useCommand();
+				}
+				commands.getSelectionModel().clearSelection();
+				controls.setState(ControlBar.STOPPED);
+			});	
+			
 		});
 		controls.setOnActionPause(e -> {
 			System.out.println("pause pressed");
@@ -52,7 +72,7 @@ public class App extends Application {
 		});
 		
 		rootPane.setTop(new VBox(menu, controls));
-	
+
 		
 		status = new StatusBar();	
 		rootPane.setBottom(status);	
