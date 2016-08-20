@@ -34,7 +34,8 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 
 public class App extends Application {
-
+	public static final String VER = "1.0.0-DEMO";
+	
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
 	private CountDownLatch pauseBarrier = new CountDownLatch(1);
 	
@@ -162,7 +163,7 @@ public class App extends Application {
 		link1.setOnAction(e -> getHostServices().showDocument("https://github.com/25DimoN25/MacroMaster"));
 		aboutDialog.setGraphic(link1);
 		aboutDialog.setHeaderText("MacroMaster - simple program to make simple macroses!");
-		aboutDialog.setContentText("version #\n\n"
+		aboutDialog.setContentText("version " + VER + "\n\n"
 								 + "By Saltykov D.\n\n"
 								 + "Click to image and visit GitHub for more information.");
 		aboutDialog.setTitle("About");

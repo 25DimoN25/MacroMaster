@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.warpex</groupId>
   <artifactId>MacroMaster</artifactId>
-  <version>1.0.0-ALPHA</version>
+  <version>1.0-DEMO</version>
   <build>
     <plugins>
       <plugin>
