@@ -1,6 +1,7 @@
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import com.tulskiy.keymaster.common.Provider;
 
@@ -10,12 +11,19 @@ import gui.ControlBar;
 import gui.MainMenu;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableView;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -33,7 +41,11 @@ public class App extends Application {
 	private long newMacrosId = 1L;
 
 	private Provider provider;
+	private Future<?> task;
 
+	private Alert hotkeysDialog;
+	private Alert aboutDialog;
+	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		
@@ -78,6 +90,12 @@ public class App extends Application {
 			executor.shutdown();
 			Platform.exit();
 		});
+		menu.setOnActionHotkeys(e -> {
+			hotkeysDialog.show();
+		});
+		menu.setOnActionAbout(e -> {
+			aboutDialog.show();
+		});
 		
 
 		controls = new ControlBar();
@@ -103,9 +121,30 @@ public class App extends Application {
 			controls.setState(ControlBar.STOPPED);
 			resume();
 			status.setText("Stopped");
+			task.cancel(true);
 		});
 		
-			
+		
+		 hotkeysDialog = new Alert(AlertType.NONE);
+		 hotkeysDialog.setContentText("CTRL + \tF9 - play macros\n"
+		 							+ "\t\tF10 - pause macros\n"
+		 							+ "\t\tF11 - stop macros\n"
+		 							+ "\t\tF12 - close programm");
+		 hotkeysDialog.setTitle("Available hotkeys");
+		 hotkeysDialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+		 
+		
+		 aboutDialog = new Alert(AlertType.INFORMATION);
+		 Hyperlink link1 = new Hyperlink(null, new ImageView("github.png"));
+		 link1.setOnAction(e -> getHostServices().showDocument("https://github.com/25DimoN25/MacroMaster"));
+		 aboutDialog.setGraphic(link1);
+		 aboutDialog.setHeaderText("MacroMaster - simple program to make simple macroses!");
+		 aboutDialog.setContentText("version #\n\n"
+								  + "By Saltykov D.\n\n"
+								  + "Click to image and visit GitHub for more information.");
+		 aboutDialog.setTitle("About");
+
+
 		status = new Label();
 		commandListTabs = new TabPane();
 	
@@ -131,7 +170,7 @@ public class App extends Application {
 		CommandListTab currentTab = (CommandListTab) commandListTabs.getSelectionModel().getSelectedItem();
 		TableView<Command> commands = currentTab.getCommands();
 		
-		executor.execute(() -> {
+		task = executor.submit(() -> {
 			
 			do {
 				for (Command command : commands.getItems()) {

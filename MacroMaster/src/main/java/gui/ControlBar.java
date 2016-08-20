@@ -5,7 +5,13 @@ import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.ToolBar;
 
-//TODO
+/**
+ * 
+ * Simple pre-maided toolbar.
+ * 
+ * @author Saltykov Dmitry (25DimoN25)
+ * 
+ */
 public class ControlBar extends ToolBar {
 	public static final int PLAYING = 1;
 	public static final int STOPPED = 2;
@@ -34,7 +40,7 @@ public class ControlBar extends ToolBar {
 	}
 	
 	/**
-	 * Set state to block any buttons.
+	 * Set state to disable buttons.
 	 * 
 	 * @param state use ControlBar static constants
 	 */
@@ -65,7 +71,10 @@ public class ControlBar extends ToolBar {
 	public int getState() {	
 		return currentState;
 	}
-
+	
+	/**
+	 * Press one of buttons.
+	 */
 	public void fireButton(int state) {
 		switch (state) {
 		case PLAYING:

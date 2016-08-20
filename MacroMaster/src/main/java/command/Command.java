@@ -120,7 +120,8 @@ public class Command implements Cloneable {
 			}
 					
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			System.err.println("interrupted");
+			return;
 		}
 	}
 

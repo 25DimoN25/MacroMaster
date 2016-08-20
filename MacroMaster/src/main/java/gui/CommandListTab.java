@@ -18,7 +18,7 @@ public class CommandListTab extends Tab {
 	private TableView<Command> commands = new CommandList();
 	private TableView<Command> newCommand = new CommandList();
 	private Button addCommand = new Button("add command");
-	private Command blankCommand = new Command(CommandType.CLICK, KeyCode.CONTROL, MouseButton.PRIMARY, new Point2D(10, 10), 1, 100);
+	private Command blankCommand = new Command(CommandType.CLICK, null, MouseButton.PRIMARY, null, 1, 100);
 	
 	
 	public CommandListTab(String title) {
@@ -43,13 +43,11 @@ public class CommandListTab extends Tab {
 				header.setVisible(false);
 			}
 		});
-		newCommand.getItems().add((Command) blankCommand.clone());
+		newCommand.getItems().add((Command) blankCommand);
 				
 		addCommand.setOnAction(e -> {
 			Command command = newCommand.getItems().get(0);
-			commands.getItems().add(command);
-			newCommand.getItems().clear();
-			newCommand.getItems().add((Command) blankCommand.clone());
+			commands.getItems().add((Command) command.clone());
 		});
 		
 		content.getChildren().addAll(commands, newCommand, addCommand);

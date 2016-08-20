@@ -183,8 +183,13 @@ public class CommandList extends TableView<Command> {
 			EventHandler<KeyEvent> keyEvent = e -> {
 				if (isEditing()) {
 					if (e.getCode() == KeyCode.ENTER) {
-						setText("x:" + fieldX.getText() + ", y:" + fieldY.getText());
-						commitEdit(new Point2D(Integer.parseInt(fieldX.getText()), Integer.parseInt(fieldY.getText())));
+						if (fieldX.getText().length() > 0 && fieldY.getText().length() > 0) {
+							setText("x:" + fieldX.getText() + ", y:" + fieldY.getText());	
+							commitEdit(new Point2D(Integer.parseInt(fieldX.getText()), Integer.parseInt(fieldY.getText())));
+						} else {
+							setText(null);	
+							commitEdit(null);
+						}
 					} else if (e.getCode() == KeyCode.ESCAPE) {
 						cancelEdit();
 					}
@@ -200,9 +205,16 @@ public class CommandList extends TableView<Command> {
 			super.updateItem(item, empty);
 			if (!empty) {
 				setGraphic(pane);
-				fieldX.setText(String.valueOf((int) item.getX()));
-				fieldY.setText(String.valueOf((int) item.getY()));
-				setText("x:" + (int) item.getX() + ", y:" + (int) item.getY());
+				if (item != null) {
+					fieldX.setText(String.valueOf((int) item.getX()));
+					fieldY.setText(String.valueOf((int) item.getY()));
+					setText("x:" + (int) item.getX() + ", y:" + (int) item.getY());
+				} else {
+					fieldX.setText("");
+					fieldY.setText("");
+					setText(null);
+				}
+
 			} else {
 				setGraphic(null);
 				setText(null);
