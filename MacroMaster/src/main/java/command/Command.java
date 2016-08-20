@@ -1,5 +1,7 @@
 package command;
 
+import java.io.Serializable;
+
 import org.testfx.robot.BaseRobot;
 import org.testfx.robot.impl.BaseRobotImpl;
 
@@ -7,8 +9,16 @@ import javafx.geometry.Point2D;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 
-public class Command implements Cloneable {
+/**
+ * Command entity with use function.
+ * 
+ * @author Saltykov Dmitry (25DimoN25)
+ *
+ */
+public class Command implements Cloneable, Serializable {
 
+	private static final long serialVersionUID = 1L;
+	
 	private BaseRobot ROBOT = new BaseRobotImpl(); 
 	private CommandType type;
 	private KeyCode key;

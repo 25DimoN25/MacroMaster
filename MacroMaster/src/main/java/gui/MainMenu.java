@@ -10,7 +10,12 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 
-//TODO
+/**
+ * Main menu of MacroMaster.
+ * 
+ * @author Saltykov Dmitry (25DimoN25)
+ *
+ */
 public class MainMenu extends MenuBar {
 	
 	private MenuItem neww = new MenuItem("New");

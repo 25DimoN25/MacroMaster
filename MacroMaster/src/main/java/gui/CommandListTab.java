@@ -1,8 +1,9 @@
 package gui;
 
+import java.io.File;
+
 import command.Command;
 import command.CommandType;
-import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tab;
@@ -12,13 +13,20 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 
-//TODO
+/**
+ * Tab implementation with list of commands, row with new command and button for add new command.
+ * 
+ * @author @author Saltykov Dmitry (25DimoN25)
+ *
+ */
 public class CommandListTab extends Tab {
 	
 	private TableView<Command> commands = new CommandList();
 	private TableView<Command> newCommand = new CommandList();
 	private Button addCommand = new Button("add command");
 	private Command blankCommand = new Command(CommandType.CLICK, null, MouseButton.PRIMARY, null, 1, 100);
+	
+	private File currentFile;
 	
 	
 	public CommandListTab(String title) {
@@ -55,8 +63,16 @@ public class CommandListTab extends Tab {
 		setText(title);
 	}
 	
+	public File getCurrentFile() {
+		return currentFile;
+	}
+
+	public void setCurrentFile(File currentFile) {
+		this.currentFile = currentFile;
+	}
+
 	public TableView<Command> getCommands() {
 		return commands;
 	}
-	
+
 }

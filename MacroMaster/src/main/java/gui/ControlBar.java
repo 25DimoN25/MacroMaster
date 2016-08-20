@@ -7,7 +7,7 @@ import javafx.scene.control.ToolBar;
 
 /**
  * 
- * Simple pre-maided toolbar.
+ * Simple toolbar with play, pause, stop buttons for MacroMaster.
  * 
  * @author Saltykov Dmitry (25DimoN25)
  * 

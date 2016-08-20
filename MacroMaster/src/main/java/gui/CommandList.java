@@ -26,7 +26,7 @@ import javafx.util.converter.NumberStringConverter;
 
 /**
  * 
- * JavaFX configured table extension for display and editing Command class objects.
+ * List (TableView) of Command with editing feature.
  * 
  * @author Saltykov Dmitry (25DimoN25)
  * 
