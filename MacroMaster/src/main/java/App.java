@@ -1,8 +1,9 @@
+import java.beans.DefaultPersistenceDelegate;
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,6 +17,9 @@ import gui.ControlBar;
 import gui.MainMenu;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Point2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -34,7 +38,7 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 
 public class App extends Application {
-	public static final String VER = "1.0.0-DEMO";
+	public static final String VER = "1.1-RELEASE";
 	
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
 	private CountDownLatch pauseBarrier = new CountDownLatch(1);
@@ -174,7 +178,7 @@ public class App extends Application {
 		 */
 		 fileChooser = new FileChooser();
 		 fileChooser.getExtensionFilters().addAll(
-		         new ExtensionFilter("XML macros", "*.xmlmm"),
+		         new ExtensionFilter("XML macros", "*.xmlm"),
 		         new ExtensionFilter("All Files", "*.*"));
 
 
@@ -198,6 +202,7 @@ public class App extends Application {
 		primaryStage.show();
 	}
 
+	
 	/**
 	 * Playing macros from current selected tab.
 	 */
@@ -262,6 +267,7 @@ public class App extends Application {
 		
 	}
 	
+	
 	/**
 	 * Removing pause in "play" function.
 	 */
@@ -270,8 +276,9 @@ public class App extends Application {
 		pauseBarrier = new CountDownLatch(1);
 	}
 	
+	
 	/**
-	 * Showing "save as" dialog with current tab name and write .xmlmm file.
+	 * Showing "save as" dialog with current tab name and write file.
 	 */
 	public void saveAs(Stage owner) {
 		CommandListTab currentTab = (CommandListTab) commandListTabs.getSelectionModel().getSelectedItem();
@@ -280,28 +287,25 @@ public class App extends Application {
 		} else {
 			
 			fileChooser.setTitle("Save macros as ..");
-			fileChooser.setInitialFileName(currentTab.getText()+".xmlmm");
+			fileChooser.setInitialFileName(currentTab.getText()+".xmlm");
 			if (currentTab.getCurrentFile() != null) {
 				fileChooser.setInitialDirectory(currentTab.getCurrentFile().getParentFile());
 			}
 			
-			File selectedFile = fileChooser.showSaveDialog(owner);
-			if (selectedFile != null) {
-//				try (ObjectOutputStream fileOut = new ObjectOutputStream(new FileOutputStream(selectedFile))) {
-//					
-//					for (Command command : currentTab.getCommands().getItems()) {
-//						fileOut.writeObject(command);
-//					}
-//					fileOut.writeObject(null);
-//					
-//				} catch (Exception exp) {
-//					status.setText("Error: can't save file");
-//					exp.printStackTrace();
-//				}
-		
-				currentTab.setCurrentFile(selectedFile);
-				currentTab.setText(selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf('.')));
-				status.setText("Saved!");
+			File destinationDir = fileChooser.showSaveDialog(owner);
+			
+			if (destinationDir != null) {
+				
+				try {
+					writeFile(currentTab.getCommands().getItems(), destinationDir);
+					currentTab.setCurrentFile(destinationDir);
+					currentTab.setText(destinationDir.getName().substring(0, destinationDir.getName().lastIndexOf('.')));
+					status.setText("Saved!");
+				} catch (Exception e) {
+					status.setText("Error: can't save file");
+					e.printStackTrace();
+				}
+			
 			}
 		}
 	}
@@ -316,21 +320,40 @@ public class App extends Application {
 		} else if (currentTab.getCurrentFile() == null) {
 			saveAs(owner);
 		} else {
-//			try (ObjectOutputStream fileOut = new ObjectOutputStream(new FileOutputStream(currentTab.getCurrentFile()))) {
-//				
-//				for (Command command : currentTab.getCommands().getItems()) {
-//					fileOut.writeObject(command);
-//				}
-//				fileOut.writeObject(null);
-//				
-//			} catch (Exception exp) {
-//				status.setText("Error: can't save file");
-//				exp.printStackTrace();
-//			}
-			
-			status.setText("Saved!");
+			try {
+				writeFile(currentTab.getCommands().getItems(), currentTab.getCurrentFile());
+				status.setText("Saved!");
+			} catch (Exception e) {
+				status.setText("Error: can't save file");
+				e.printStackTrace();
+			}
 		}
 	}
+	
+	/**
+	 * Core of saving macros.
+	 * @throws Exception 
+	 */
+	private void writeFile(ObservableList<Command> sourse, File destination) throws Exception {
+		
+		try (XMLEncoder encoder = new XMLEncoder(new FileOutputStream(destination))) {
+			
+			encoder.setPersistenceDelegate(Point2D.class, 
+					new DefaultPersistenceDelegate(
+							new String[] {"x", "y"}));
+			encoder.setPersistenceDelegate(Command.class, 
+					new DefaultPersistenceDelegate(
+							new String[] {"type", "key", "mbutton", "coordinates", "count", "delay"})); 
+
+			for (Command command : sourse) {
+				encoder.writeObject(command);
+			}
+			
+		} catch (Exception exp) {
+			throw exp;
+		}	
+	}
+	
 	
 	/**
 	 * Show file open dialog, read file and creating tab with this file macros.
@@ -340,25 +363,50 @@ public class App extends Application {
 
 		File selectedFile = fileChooser.showOpenDialog(owner);
 		if (selectedFile != null) {
-//			try (ObjectInputStream fileIn = new ObjectInputStream(new FileInputStream(selectedFile))) {
-//				CommandListTab newMacos = new CommandListTab(selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf('.')));
-//
-//				for (Object command = fileIn.readObject(); command != null; command = fileIn.readObject()) {
-//					newMacos.getCommands().getItems().add((Command) command);
-//				}
-//
-//				newMacos.setCurrentFile(selectedFile);
-//				commandListTabs.getTabs().add(newMacos);
-//				
-//			} catch (Exception exp) {
-//				status.setText("Error: can't load " + selectedFile.getName());
-//				exp.printStackTrace();
-//			}
+			try {
+				ObservableList<Command> commands = readFile(selectedFile);
+				
+				String fileName = selectedFile.getName();
+				if (selectedFile.getName().matches(".+\\.xmlm$")) {
+					fileName = fileName.replaceAll("\\.xmlm$", "");
+				}
+
+				CommandListTab newMacros = new CommandListTab(fileName);
+				newMacros.setCurrentFile(selectedFile);
+				newMacros.getCommands().getItems().addAll(commands);
+				commandListTabs.getTabs().add(newMacros);
+				
+			} catch (Exception exp) {
+				status.setText("Error: can't load " + selectedFile.getName());
+				exp.printStackTrace();
+			}
 
 			status.setText("Opened!");
 		}
 	}
+	
+	
+	/**
+	 * 
+	 */
+	private ObservableList<Command> readFile(File file) throws Exception {
+		ObservableList<Command> commands = FXCollections.observableArrayList();
 		
+		try (XMLDecoder decoder = new XMLDecoder(new FileInputStream(file))) {
+			while (true) {
+				Command newCommand = (Command) decoder.readObject();
+				commands.add(newCommand);
+			}
+		} catch (ArrayIndexOutOfBoundsException e) {
+			// "DOCS: read(): if the stream contains no objects (or no more objects) - throws ArrayIndexOutOfBoundsException"
+			// Its allright, do nothing
+		} catch (Exception e) {
+			throw e;
+		}
+		
+		return commands;
+	}
+	
 	public static void main(String[] args) {
 		launch(args);
 	}

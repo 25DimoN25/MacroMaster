@@ -80,7 +80,7 @@ public class CommandList extends TableView<Command> {
 		 * Configuring 3rd column for displaying and editing key of mouse;
 		 */
 		TableColumn<Command, MouseButton> keyboardKeyColumn = new TableColumn<>("MButton"); 
-		keyboardKeyColumn.setCellValueFactory(new PropertyValueFactory<>("mButton"));
+		keyboardKeyColumn.setCellValueFactory(new PropertyValueFactory<>("mbutton"));
 		keyboardKeyColumn.setSortable(false);
 		
 		ObservableList<MouseButton> keyboardKeyColumnData = FXCollections.observableArrayList(MouseButton.class.getEnumConstants());
@@ -89,7 +89,7 @@ public class CommandList extends TableView<Command> {
 		
 		keyboardKeyColumn.setCellFactory(ComboBoxTableCell.forTableColumn(keyboardKeyColumnData));
 		keyboardKeyColumn.setOnEditCommit(t -> {
-			t.getTableView().getItems().get(t.getTablePosition().getRow()).setMButton(t.getNewValue());
+			t.getTableView().getItems().get(t.getTablePosition().getRow()).setMbutton(t.getNewValue());
 		});
 		getColumns().add(keyboardKeyColumn);
 		

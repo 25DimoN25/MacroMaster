@@ -1,7 +1,5 @@
 package command;
 
-import java.io.Serializable;
-
 import org.testfx.robot.BaseRobot;
 import org.testfx.robot.impl.BaseRobotImpl;
 
@@ -15,17 +13,15 @@ import javafx.scene.input.MouseButton;
  * @author Saltykov Dmitry (25DimoN25)
  *
  */
-public class Command implements Cloneable, Serializable {
-
-	private static final long serialVersionUID = 1L;
+public class Command implements Cloneable {
 	
-	private BaseRobot ROBOT = new BaseRobotImpl(); 
+	private static BaseRobot ROBOT = new BaseRobotImpl();;
 	private CommandType type;
 	private KeyCode key;
 	private MouseButton mbutton;
 	private Point2D coordinates;
-	private Integer count;
-	private Integer delay;
+	private int count;
+	private int delay;
 	
 	
 	public Command(CommandType type, KeyCode key, MouseButton mbutton, Point2D coordinates, int count,	int delay) {
@@ -54,11 +50,11 @@ public class Command implements Cloneable, Serializable {
 		this.key = key;
 	}
 	
-	public MouseButton getMButton() {
+	public MouseButton getMbutton() {
 		return mbutton;
 	}
 	
-	public void setMButton(MouseButton mbutton) {
+	public void setMbutton(MouseButton mbutton) {
 		this.mbutton = mbutton;
 	}
 
@@ -137,12 +133,12 @@ public class Command implements Cloneable, Serializable {
 
 	@Override
 	public Object clone() {
-		return new Command(getType(), getKey(), getMButton(), getCoordinates(), getCount(), getDelay());
+		return new Command(getType(), getKey(), getMbutton(), getCoordinates(), getCount(), getDelay());
 	}
 	
 	@Override
 	public String toString() {
-		return this.getClass().getSimpleName() + "[" + getType() + ", " + getKey() + ", " + getMButton() + ", "
+		return this.getClass().getSimpleName() + "[" + getType() + ", " + getKey() + ", " + getMbutton() + ", "
 				+ getCoordinates() + ", " + getCount() + ", " + getDelay() + "]";
 	}
 
