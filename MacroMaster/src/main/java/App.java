@@ -43,7 +43,7 @@ import javafx.stage.Stage;
  * JavaFX Application.
  */
 public class App extends Application {
-	private static final String VER = "1.2-RELEASE";
+	private static final String VER = "1.2.2-RELEASE";
 	
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
 	private CountDownLatch pauseBarrier = new CountDownLatch(1);
@@ -402,18 +402,15 @@ public class App extends Application {
 
 		fileChooser.setTitle("Save macros as ..");
 		fileChooser.setInitialFileName(currentTab.getText()+".xmlm");
-		if (currentTab.getCurrentFile() != null) {
-			fileChooser.setInitialDirectory(currentTab.getCurrentFile().getParentFile());
-		}
 		
-		File destinationDir = fileChooser.showSaveDialog(owner);
+		File selectedFile = fileChooser.showSaveDialog(owner);
 		
-		if (destinationDir != null) {
-			
+		if (selectedFile != null) {
+			fileChooser.setInitialDirectory(selectedFile.getParentFile());
 			try {
-				writeFile(currentTab.getCommands().getItems(), destinationDir);
-				currentTab.setCurrentFile(destinationDir);
-				currentTab.setText(destinationDir.getName().substring(0, destinationDir.getName().lastIndexOf('.')));
+				writeFile(currentTab.getCommands().getItems(), selectedFile);
+				currentTab.setCurrentFile(selectedFile);
+				currentTab.setText(selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf('.')));
 				status.setText("Saved!");
 			} catch (Exception e) {
 				status.setText("Error: can't save file");
@@ -472,9 +469,9 @@ public class App extends Application {
 	 */
 	private void open(Stage owner) {
 		fileChooser.setTitle("Open macros");
-
 		File selectedFile = fileChooser.showOpenDialog(owner);
 		if (selectedFile != null) {
+			fileChooser.setInitialDirectory(selectedFile.getParentFile());
 			try {
 				ObservableList<Command> commands = readFile(selectedFile);
 				
@@ -492,7 +489,6 @@ public class App extends Application {
 				status.setText("Error: can't load " + selectedFile.getName());
 				exp.printStackTrace();
 			}
-
 			status.setText("Opened!");
 		}
 	}
