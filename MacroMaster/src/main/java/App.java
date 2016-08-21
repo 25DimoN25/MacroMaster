@@ -12,6 +12,7 @@ import java.util.concurrent.Future;
 import com.tulskiy.keymaster.common.Provider;
 
 import command.Command;
+import gui.CommandList;
 import gui.CommandListTab;
 import gui.ControlBar;
 import gui.MainMenu;
@@ -30,6 +31,7 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TableView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -37,8 +39,11 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 
+/**
+ * JavaFX Application.
+ */
 public class App extends Application {
-	public static final String VER = "1.1-RELEASE";
+	private static final String VER = "1.2-RELEASE";
 	
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
 	private CountDownLatch pauseBarrier = new CountDownLatch(1);
@@ -48,11 +53,12 @@ public class App extends Application {
 	private Label status;
 	private ControlBar controls;
 	
-	private long newMacrosId = 1L;
+	private long newMacrosId = 1L; //new macros tab id;
 
 	private Provider provider; //Hotkey provider;
 	private Future<?> task; //Only for interrupting current macros; 
 
+	private Alert tutorialDialog;
 	private Alert hotkeysDialog;
 	private Alert aboutDialog;
 	
@@ -67,25 +73,26 @@ public class App extends Application {
 		provider = Provider.getCurrentProvider(false);
 		provider.register(javax.swing.KeyStroke.getKeyStroke("control F9"), e -> {
 			Platform.runLater(() -> {
+				java.awt.Toolkit.getDefaultToolkit().beep();
 				controls.fireButton(ControlBar.PLAYING);
 			});
 		});
 		provider.register(javax.swing.KeyStroke.getKeyStroke("control F10"), e -> {
 			Platform.runLater(() -> {
+				java.awt.Toolkit.getDefaultToolkit().beep();
 				controls.fireButton(ControlBar.PAUSED);
 			});
 		});
 		provider.register(javax.swing.KeyStroke.getKeyStroke("control F11"), e -> {
 			Platform.runLater(() -> {
+				java.awt.Toolkit.getDefaultToolkit().beep();
 				controls.fireButton(ControlBar.STOPPED);
 			});
 		});
 		provider.register(javax.swing.KeyStroke.getKeyStroke("control F12"), e -> {
 			Platform.runLater(() -> {
-				provider.reset();
-				provider.stop();
-				executor.shutdown();
-				Platform.exit();
+				java.awt.Toolkit.getDefaultToolkit().beep();
+				exit();
 			});
 		});
 		
@@ -94,8 +101,15 @@ public class App extends Application {
 		 * Configurating menu actions;
 		 */
 		menu = new MainMenu();
+		menu.setSaveDisable(true);
 		menu.setOnActionNew(e -> {
-			CommandListTab tab = new CommandListTab("New macros " + newMacrosId);		
+			CommandListTab tab = new CommandListTab("New macros " + newMacrosId);
+			CommandList commands = tab.getCommands();
+			commands.setOnKeyPressed(e2 -> {
+				if (e2.getCode() == KeyCode.DELETE && controls.getState() == ControlBar.STOPPED) {
+					commands.getItems().removeAll(commands.getSelectionModel().getSelectedItems());
+				}
+			});
 			commandListTabs.getTabs().add(tab);
 			newMacrosId++;
 		});
@@ -105,10 +119,16 @@ public class App extends Application {
 			executor.shutdown();
 			Platform.exit();
 		});
+		menu.setOnActionTutorial(e -> {
+			tutorialDialog.initOwner(primaryStage);
+			tutorialDialog.show();
+		});
 		menu.setOnActionHotkeys(e -> {
+			hotkeysDialog.initOwner(primaryStage);
 			hotkeysDialog.show();
 		});
 		menu.setOnActionAbout(e -> {
+			aboutDialog.initOwner(primaryStage);
 			aboutDialog.show();
 		});
 		menu.setOnActionSaveAs(e -> {
@@ -127,11 +147,12 @@ public class App extends Application {
 		 */
 		controls = new ControlBar();
 		controls.setState(ControlBar.STOPPED);
+		controls.setDisable(true);
 		controls.setOnActionPlay(e -> {			
 			if (controls.getState() == ControlBar.PAUSED) {
-				resume();
+				resumeMacros();
 			} else {
-				play();
+				playMacros();
 			}
 			controls.setState(ControlBar.PLAYING);
 		});
@@ -141,11 +162,29 @@ public class App extends Application {
 		});
 		controls.setOnActionStop(e -> {
 			controls.setState(ControlBar.STOPPED);
-			resume();
+			resumeMacros();
 			status.setText("Stopped");
 			task.cancel(true); //interrupt current macros with using "Future";
 		});
 		
+		
+		/*
+		 * Tutorial dialog for menu;
+		 */
+		tutorialDialog = new Alert(AlertType.NONE);
+		tutorialDialog.setContentText("Tutorial:\n\n"
+									+ "1. Click File -> New macros to create new macros;\n\n"
+									+ "2. Configure fields with command parameters upper \"Add command\" button."
+									+ "You can combine any actions with mouse and keyboard in one command;\n\n"
+									+ "3. Press \"Add command\" to add your new command;\n\n"
+									+ "4. After making macros - you can run it. Press play button;\n\n"
+									+ "5. You can edit your current macros at pause;\n\n"
+									+ "6. You can add or remove (DELETE key) commands only in stopped state;\n\n"
+									+ "7. Pause button stops macros only between commands (i.e. its not work"
+									+ "with #BIG_NUMBER#-counted commands);\n\n"
+									+ "8. Stop button can interrupt macros at any time;");
+		tutorialDialog.setTitle("Tutorial");
+		tutorialDialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
 		
 		/*
 		 * Hotkeys dialog for menu;
@@ -164,10 +203,12 @@ public class App extends Application {
 		 */
 		aboutDialog = new Alert(AlertType.INFORMATION);
 		Hyperlink link1 = new Hyperlink(null, new ImageView("github.png"));
-		link1.setOnAction(e -> getHostServices().showDocument("https://github.com/25DimoN25/MacroMaster"));
+		link1.setOnAction(e -> {
+			getHostServices().showDocument("https://github.com/25DimoN25/MacroMaster");	
+		});
 		aboutDialog.setGraphic(link1);
 		aboutDialog.setHeaderText("MacroMaster - simple program to make simple macroses!");
-		aboutDialog.setContentText("version " + VER + "\n\n"
+		aboutDialog.setContentText("Version " + VER + "\n\n"
 								 + "By Saltykov D.\n\n"
 								 + "Click to image and visit GitHub for more information.");
 		aboutDialog.setTitle("About");
@@ -182,9 +223,22 @@ public class App extends Application {
 		         new ExtensionFilter("All Files", "*.*"));
 
 
-		status = new Label();
+		 /*
+		  * TabPane;
+		  */
 		commandListTabs = new TabPane();
-	
+		commandListTabs.getSelectionModel().selectedIndexProperty().addListener((obs, oldV, newV) -> {
+			if (newV.intValue() < 0) {
+				controls.setDisable(true);
+				menu.setSaveDisable(true);
+			} else {
+				controls.setDisable(false);
+				menu.setSaveDisable(false);
+			}
+		});
+		
+		status = new Label();
+		
 		BorderPane rootPane = new BorderPane();
 		rootPane.setBottom(status);
 		rootPane.setTop(new VBox(menu, controls));
@@ -194,9 +248,7 @@ public class App extends Application {
 		primaryStage.setScene(scene);	
 		primaryStage.setTitle("MacroMaster");
 		primaryStage.setOnCloseRequest(e -> {
-			provider.reset();
-			provider.stop();
-			executor.shutdown();
+			exit();
 		});
 		primaryStage.getIcons().add(new Image("icon.png"));
 		primaryStage.show();
@@ -204,110 +256,172 @@ public class App extends Application {
 
 	
 	/**
+	 * Shutdown application.
+	 */
+	private void exit() {
+		provider.reset();
+		provider.stop();
+		executor.shutdown();
+		Platform.exit();
+	}
+
+
+	/**
 	 * Playing macros from current selected tab.
 	 */
-	private void play() {	
+	private void playMacros() {	
 		CommandListTab currentTab = (CommandListTab) commandListTabs.getSelectionModel().getSelectedItem();
-		if (currentTab == null) {
-			status.setText("Nothing to play");
-		} else {
-			TableView<Command> commands = currentTab.getCommands();
-			
-			task = executor.submit(() -> {	
-				do {
-					for (Command command : commands.getItems()) {
-						
-						/*
-						 * Pause (if requested) between commands;
-						 */
-						if (controls.getState() == ControlBar.PAUSED) {
-							try {
-								pauseBarrier.await();
-							} catch (InterruptedException e1) {
-								e1.printStackTrace();
-							}
-						}
-						
-						/*
-						 * Break if stopped;
-						 */
-						if (controls.getState() == ControlBar.STOPPED) {
-							return;
-						}
-				
-						/*
-						 * UI "animation";
-						 */
-						Platform.runLater(() -> {
-							commands.getSelectionModel().clearSelection();
-							commands.getSelectionModel().select(command);	
-							status.setText("Using: " + command);
-						});
-						
-						/*
-						 * Core of this function;
-						 */
-						command.useCommand();
-					}
-				} while (menu.isRepeat());
-				
-				/*
-				 * UI "animation" for ends;
-				 */
-				Platform.runLater(() -> {
-					commands.getSelectionModel().clearSelection();
-					controls.setState(ControlBar.STOPPED);
-					status.setText("Finished!");
-					java.awt.Toolkit.getDefaultToolkit().beep();
-				});
-				
-			});	
-			
-		}
+		TableView<Command> tabCommands = currentTab.getCommands();
 		
+		task = executor.submit(() -> {
+			
+			/*
+			 * UI "animation" for begins;
+			 */
+			Platform.runLater(() -> {
+
+				commandListTabs.getTabs().stream() //disable other tabs
+										.filter(tab -> !tab.equals(currentTab))
+										.forEach(e -> e.setDisable(true));
+				menu.setDisable(true);
+				currentTab.setAddButtonDisable(true);
+				currentTab.setCommandListDisable(true);
+				
+				currentTab.setGraphic(new ImageView("play_small.png"));
+				currentTab.setClosable(false);
+			});
+			
+			do {
+				for (Command command : tabCommands.getItems()) {
+					
+					/*
+					 * Pause (if requested) between commands;
+					 */
+					if (controls.getState() == ControlBar.PAUSED) {
+						try {
+							Platform.runLater(() -> {
+								currentTab.setGraphic(new ImageView("pause_small.png"));
+								currentTab.setCommandListDisable(false);
+								menu.setDisable(false);
+								commandListTabs.getTabs().stream()
+												.filter(tab -> !tab.equals(currentTab))
+												.forEach(e -> e.setDisable(false));
+							});
+							pauseBarrier.await();
+							Platform.runLater(() -> {
+								currentTab.setGraphic(new ImageView("play_small.png"));
+								currentTab.setCommandListDisable(true);
+								menu.setDisable(true);
+								commandListTabs.getTabs().stream()
+												.filter(tab -> !tab.equals(currentTab))
+												.forEach(e -> e.setDisable(true));
+								commandListTabs.getSelectionModel().select(currentTab);
+							});
+						} catch (InterruptedException e1) {
+							e1.printStackTrace();
+						}
+					}
+					
+					/*
+					 * Break if stopped;
+					 */
+					if (controls.getState() == ControlBar.STOPPED) {
+						Platform.runLater(() -> {
+							finishMacros(currentTab);
+						});
+						return;
+					}
+			
+					/*
+					 * UI "animation";
+					 */
+					Platform.runLater(() -> {
+						tabCommands.getSelectionModel().clearSelection();
+						tabCommands.getSelectionModel().select(command);	
+						status.setText("Using: " + command);
+					});
+					
+					/*
+					 * Core of this function;
+					 */
+					try {
+						command.useCommand();
+					} catch (InterruptedException e) {
+						//break if interrupted;
+						Platform.runLater(() -> {
+							finishMacros(currentTab);
+						});
+					}
+				}
+			} while (menu.isRepeat());
+			
+			/*
+			 * UI "animation" for ends;
+			 */
+			Platform.runLater(() -> {
+				finishMacros(currentTab);
+				java.awt.Toolkit.getDefaultToolkit().beep();
+			});
+			
+		});	
+	
 	}
 	
 	
 	/**
 	 * Removing pause in "play" function.
 	 */
-	public void resume() {
+	private void resumeMacros() {
 		pauseBarrier.countDown();
 		pauseBarrier = new CountDownLatch(1);
 	}
 	
+	/**
+	 * Finish macros event handler
+	 */
+	private void finishMacros(CommandListTab currentTab) {
+		commandListTabs.getTabs().stream() //enable other tabs
+						.filter(tab -> !tab.equals(currentTab))
+						.forEach(e -> e.setDisable(false));
+		menu.setDisable(false);
+		currentTab.setAddButtonDisable(false);
+		currentTab.setCommandListDisable(false);
+		
+		currentTab.setGraphic(null);
+		currentTab.setClosable(true);
+		currentTab.getCommands().getSelectionModel().clearSelection();
+		controls.setState(ControlBar.STOPPED);
+		status.setText("Finished!");
+	}
 	
 	/**
 	 * Showing "save as" dialog with current tab name and write file.
 	 */
-	public void saveAs(Stage owner) {
+	private void saveAs(Stage owner) {
 		CommandListTab currentTab = (CommandListTab) commandListTabs.getSelectionModel().getSelectedItem();
-		if (currentTab == null) {
-			status.setText("Nothing to save!");
-		} else {
-			
-			fileChooser.setTitle("Save macros as ..");
-			fileChooser.setInitialFileName(currentTab.getText()+".xmlm");
-			if (currentTab.getCurrentFile() != null) {
-				fileChooser.setInitialDirectory(currentTab.getCurrentFile().getParentFile());
-			}
-			
-			File destinationDir = fileChooser.showSaveDialog(owner);
-			
-			if (destinationDir != null) {
-				
-				try {
-					writeFile(currentTab.getCommands().getItems(), destinationDir);
-					currentTab.setCurrentFile(destinationDir);
-					currentTab.setText(destinationDir.getName().substring(0, destinationDir.getName().lastIndexOf('.')));
-					status.setText("Saved!");
-				} catch (Exception e) {
-					status.setText("Error: can't save file");
-					e.printStackTrace();
-				}
-			
-			}
+
+		fileChooser.setTitle("Save macros as ..");
+		fileChooser.setInitialFileName(currentTab.getText()+".xmlm");
+		if (currentTab.getCurrentFile() != null) {
+			fileChooser.setInitialDirectory(currentTab.getCurrentFile().getParentFile());
 		}
+		
+		File destinationDir = fileChooser.showSaveDialog(owner);
+		
+		if (destinationDir != null) {
+			
+			try {
+				writeFile(currentTab.getCommands().getItems(), destinationDir);
+				currentTab.setCurrentFile(destinationDir);
+				currentTab.setText(destinationDir.getName().substring(0, destinationDir.getName().lastIndexOf('.')));
+				status.setText("Saved!");
+			} catch (Exception e) {
+				status.setText("Error: can't save file");
+				e.printStackTrace();
+			}
+		
+		}
+		
 	}
 	
 	/**
@@ -315,9 +429,7 @@ public class App extends Application {
 	 */
 	private void save(Stage owner) {
 		CommandListTab currentTab = (CommandListTab) commandListTabs.getSelectionModel().getSelectedItem();
-		if (currentTab == null) {
-			status.setText("Nothing to save!");
-		} else if (currentTab.getCurrentFile() == null) {
+		if (currentTab.getCurrentFile() == null) {
 			saveAs(owner);
 		} else {
 			try {
@@ -387,7 +499,7 @@ public class App extends Application {
 	
 	
 	/**
-	 * 
+	 * Core of reading macros from filesystem.
 	 */
 	private ObservableList<Command> readFile(File file) throws Exception {
 		ObservableList<Command> commands = FXCollections.observableArrayList();

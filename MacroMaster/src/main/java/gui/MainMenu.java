@@ -24,6 +24,7 @@ public class MainMenu extends MenuBar {
 	private MenuItem saveAs = new MenuItem("Save as ...");
 	private MenuItem exit = new MenuItem("Exit");
 	private CheckMenuItem repeat = new CheckMenuItem("Repeat");
+	private MenuItem tutorial = new MenuItem("Tutorial");
 	private MenuItem hotkeys = new MenuItem("Hotheys");
 	private MenuItem about = new MenuItem("About");
 	
@@ -43,6 +44,7 @@ public class MainMenu extends MenuBar {
 				new Menu("Options", null,
 					repeat), 
 				new Menu("Help", null,
+						tutorial,
 						hotkeys,
 						new SeparatorMenuItem(),
 						about
@@ -70,6 +72,10 @@ public class MainMenu extends MenuBar {
 		exit.setOnAction(value);
 	}
 	
+	public void setOnActionTutorial(EventHandler<ActionEvent> value) {
+		tutorial.setOnAction(value);
+	}
+	
 	public void setOnActionHotkeys(EventHandler<ActionEvent> value) {
 		hotkeys.setOnAction(value);
 	}
@@ -81,6 +87,15 @@ public class MainMenu extends MenuBar {
 	public boolean isRepeat() {
 		return repeat.isSelected();
 	}
+
+
+	public void setSaveDisable(boolean disable) {
+		save.setDisable(disable);
+		saveAs.setDisable(disable);
+	}
+
+
+
 
 
 

@@ -3,7 +3,9 @@ package gui;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ToolBar;
+import javafx.scene.image.ImageView;
 
 /**
  * 
@@ -17,14 +19,17 @@ public class ControlBar extends ToolBar {
 	public static final int STOPPED = 2;
 	public static final int PAUSED = 3;
 	
-	private Button play = new Button("\u25B6");
-	private Button pause = new Button("ll");
-	private Button stop = new Button("\u25FC");
+	private Button play = new Button("\u25B6", new ImageView("play.png"));
+	private Button pause = new Button("ll", new ImageView("pause.png"));
+	private Button stop = new Button("\u25FC", new ImageView("stop.png"));
 	
 	private int currentState = STOPPED;
 	
 	public ControlBar() {
-		getItems().addAll(play, pause, stop);	
+		getItems().addAll(play, pause, stop);
+		getItems().forEach(e -> {
+			((Button) e).setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+		});
 	}
 
 	public void setOnActionPlay(EventHandler<ActionEvent> value) {

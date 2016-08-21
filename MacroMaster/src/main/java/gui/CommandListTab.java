@@ -7,8 +7,6 @@ import command.CommandType;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tab;
-import javafx.scene.control.TableView;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -21,8 +19,8 @@ import javafx.scene.layout.VBox;
  */
 public class CommandListTab extends Tab {
 	
-	private TableView<Command> commands = new CommandList();
-	private TableView<Command> newCommand = new CommandList();
+	private CommandList commands = new CommandList();
+	private CommandList newCommand = new CommandList();
 	private Button addCommand = new Button("add command");
 	private Command blankCommand = new Command(CommandType.CLICK, null, MouseButton.PRIMARY, null, 1, 100);
 	
@@ -32,12 +30,6 @@ public class CommandListTab extends Tab {
 	public CommandListTab(String title) {
 		VBox content = new VBox(3);
 		content.setAlignment(Pos.CENTER);
-
-		commands.setOnKeyPressed(e -> {
-			if (e.getCode() == KeyCode.DELETE) {
-				commands.getItems().removeAll(commands.getSelectionModel().getSelectedItems());
-			}
-		});
 		
 		newCommand.setPrefHeight(32);
 		newCommand.setMinHeight(32);
@@ -71,8 +63,15 @@ public class CommandListTab extends Tab {
 		this.currentFile = currentFile;
 	}
 
-	public TableView<Command> getCommands() {
+	public CommandList getCommands() {
 		return commands;
 	}
 
+	public void setAddButtonDisable(boolean disable) {
+		addCommand.setDisable(disable);
+	}
+	
+	public void setCommandListDisable(boolean disable) {
+		commands.setEditable(!disable);
+	}
 }

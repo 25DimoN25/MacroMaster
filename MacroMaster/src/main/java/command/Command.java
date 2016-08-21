@@ -82,13 +82,12 @@ public class Command implements Cloneable {
 		this.delay = delay;
 	}
 
-	public void useCommand() {
-		try {
-			for (int i = 0; i < count; i++) {
-				if (coordinates != null) {
-					ROBOT.moveMouse(coordinates);
-				}
-				
+	public void useCommand() throws InterruptedException {
+		for (int i = 0; i < count; i++) {
+			if (coordinates != null) {
+				ROBOT.moveMouse(coordinates);
+			}
+			if (type != null) {
 				switch (type) {
 					case CLICK:
 						if (mbutton != null) {
@@ -116,19 +115,14 @@ public class Command implements Cloneable {
 							ROBOT.releaseKeyboard(key);
 						}
 						break;
-					default:
-						break;
-				}	
-				
-				if (delay > 0) {
-					Thread.sleep(delay);
 				}
 			}
-					
-		} catch (InterruptedException e) {
-			System.err.println("interrupted");
-			return;
+			
+			if (delay > 0) {
+				Thread.sleep(delay);
+			}
 		}
+
 	}
 
 	@Override
