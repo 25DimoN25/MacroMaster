@@ -62,7 +62,7 @@ public class CommandList extends TableView<Command> {
 		/*
 		 * Configuring 2nd column for displaying and editing pressing key of keyboard;
 		 */
-		TableColumn<Command, KeyCode> mouseButtonColumn = new TableColumn<>("Key");
+		TableColumn<Command, KeyCode> mouseButtonColumn = new TableColumn<>("Keyboard key");
 		mouseButtonColumn.setCellValueFactory(new PropertyValueFactory<>("key"));
 		mouseButtonColumn.setSortable(false);
 		
@@ -79,7 +79,7 @@ public class CommandList extends TableView<Command> {
 		/*
 		 * Configuring 3rd column for displaying and editing key of mouse;
 		 */
-		TableColumn<Command, MouseButton> keyboardKeyColumn = new TableColumn<>("MButton"); 
+		TableColumn<Command, MouseButton> keyboardKeyColumn = new TableColumn<>("Mouse button"); 
 		keyboardKeyColumn.setCellValueFactory(new PropertyValueFactory<>("mbutton"));
 		keyboardKeyColumn.setSortable(false);
 		
@@ -123,7 +123,7 @@ public class CommandList extends TableView<Command> {
 		/*
 		 * Configuring 6th column for displaying and editing type of delay of command;
 		 */
-		TableColumn<Command, Number> delayColumn = new TableColumn<>("Delay"); 
+		TableColumn<Command, Number> delayColumn = new TableColumn<>("Delay (ms)"); 
 		delayColumn.setCellValueFactory(new PropertyValueFactory<>("delay"));
 		delayColumn.setCellFactory(TextFieldTableCell.<Command, Number>forTableColumn(new NumberStringConverter()));
 		delayColumn.setOnEditCommit(t -> {
