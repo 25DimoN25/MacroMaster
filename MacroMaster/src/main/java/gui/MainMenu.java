@@ -1,7 +1,5 @@
 package gui;
 
-
-
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.CheckMenuItem;
@@ -94,11 +92,4 @@ public class MainMenu extends MenuBar {
 		saveAs.setDisable(disable);
 	}
 
-
-
-
-
-
-
-	
 }

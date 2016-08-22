@@ -9,6 +9,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.tulskiy.keymaster.common.Provider;
 
 import command.Command;
@@ -28,7 +31,6 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.TabPane;
-import javafx.scene.control.TableView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -43,7 +45,7 @@ import javafx.stage.Stage;
  * JavaFX Application.
  */
 public class App extends Application {
-	private static final String VER = "1.2.2-RELEASE";
+	private static final String VER = "1.2.5-RELEASE";
 	
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
 	private CountDownLatch pauseBarrier = new CountDownLatch(1);
@@ -56,13 +58,15 @@ public class App extends Application {
 	private long newMacrosId = 1L; //new macros tab id;
 
 	private Provider provider; //Hotkey provider;
-	private Future<?> task; //Only for interrupting current macros; 
+	private Future<?> task; //Only for (stop) interrupt current macros; 
 
 	private Alert tutorialDialog;
 	private Alert hotkeysDialog;
 	private Alert aboutDialog;
 	
 	private FileChooser fileChooser;
+	
+	private final Logger LOG = LoggerFactory.getLogger(App.class);
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -72,28 +76,20 @@ public class App extends Application {
 		 */
 		provider = Provider.getCurrentProvider(false);
 		provider.register(javax.swing.KeyStroke.getKeyStroke("control F9"), e -> {
-			Platform.runLater(() -> {
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				controls.fireButton(ControlBar.PLAYING);
-			});
+			java.awt.Toolkit.getDefaultToolkit().beep();
+			controls.fireButton(ControlBar.PLAYING);
 		});
 		provider.register(javax.swing.KeyStroke.getKeyStroke("control F10"), e -> {
-			Platform.runLater(() -> {
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				controls.fireButton(ControlBar.PAUSED);
-			});
+			java.awt.Toolkit.getDefaultToolkit().beep();
+			controls.fireButton(ControlBar.PAUSED);
 		});
 		provider.register(javax.swing.KeyStroke.getKeyStroke("control F11"), e -> {
-			Platform.runLater(() -> {
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				controls.fireButton(ControlBar.STOPPED);
-			});
+			java.awt.Toolkit.getDefaultToolkit().beep();
+			controls.fireButton(ControlBar.STOPPED);
 		});
 		provider.register(javax.swing.KeyStroke.getKeyStroke("control F12"), e -> {
-			Platform.runLater(() -> {
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				exit();
-			});
+			java.awt.Toolkit.getDefaultToolkit().beep();
+			exit();
 		});
 		
 		
@@ -120,15 +116,13 @@ public class App extends Application {
 			Platform.exit();
 		});
 		menu.setOnActionTutorial(e -> {
-			tutorialDialog.initOwner(primaryStage);
 			tutorialDialog.show();
 		});
 		menu.setOnActionHotkeys(e -> {
-			hotkeysDialog.initOwner(primaryStage);
 			hotkeysDialog.show();
 		});
 		menu.setOnActionAbout(e -> {
-			aboutDialog.initOwner(primaryStage);
+			java.awt.Toolkit.getDefaultToolkit().beep();
 			aboutDialog.show();
 		});
 		menu.setOnActionSaveAs(e -> {
@@ -140,7 +134,7 @@ public class App extends Application {
 		menu.setOnActionOpen(e -> {
 			open(primaryStage);
 		});
-		
+
 		
 		/*
 		 * Configurating control bar actions;
@@ -148,23 +142,14 @@ public class App extends Application {
 		controls = new ControlBar();
 		controls.setState(ControlBar.STOPPED);
 		controls.setDisable(true);
-		controls.setOnActionPlay(e -> {			
-			if (controls.getState() == ControlBar.PAUSED) {
-				resumeMacros();
-			} else {
-				playMacros();
-			}
-			controls.setState(ControlBar.PLAYING);
+		controls.setOnActionPlay(e -> {
+			playMacros();
 		});
 		controls.setOnActionPause(e -> {
-			controls.setState(ControlBar.PAUSED);
-			status.setText("Paused...");
+			pauseMacros();
 		});
 		controls.setOnActionStop(e -> {
-			controls.setState(ControlBar.STOPPED);
-			resumeMacros();
-			status.setText("Stopped");
-			task.cancel(true); //interrupt current macros with using "Future";
+			stopMacros();
 		});
 		
 		
@@ -185,6 +170,7 @@ public class App extends Application {
 									+ "8. Stop button can interrupt macros at any time;");
 		tutorialDialog.setTitle("Tutorial");
 		tutorialDialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+		
 		
 		/*
 		 * Hotkeys dialog for menu;
@@ -212,7 +198,7 @@ public class App extends Application {
 								 + "By Saltykov D.\n\n"
 								 + "Click to image and visit GitHub for more information.");
 		aboutDialog.setTitle("About");
-
+		
 		
 		/*
 		 * Open save dialog for menu;
@@ -252,6 +238,11 @@ public class App extends Application {
 		});
 		primaryStage.getIcons().add(new Image("icon.png"));
 		primaryStage.show();
+		
+		tutorialDialog.initOwner(primaryStage);
+		hotkeysDialog.initOwner(primaryStage);
+		aboutDialog.initOwner(primaryStage);
+		
 	}
 
 	
@@ -265,134 +256,190 @@ public class App extends Application {
 		Platform.exit();
 	}
 
-
+	
 	/**
 	 * Playing macros from current selected tab.
 	 */
-	private void playMacros() {	
+	private void playMacros() {		
 		CommandListTab currentTab = (CommandListTab) commandListTabs.getSelectionModel().getSelectedItem();
-		TableView<Command> tabCommands = currentTab.getCommands();
-		
-		task = executor.submit(() -> {
-			
-			/*
-			 * UI "animation" for begins;
-			 */
-			Platform.runLater(() -> {
 
-				commandListTabs.getTabs().stream() //disable other tabs
-										.filter(tab -> !tab.equals(currentTab))
-										.forEach(e -> e.setDisable(true));
-				menu.setDisable(true);
-				currentTab.setAddButtonDisable(true);
-				currentTab.setCommandListDisable(true);
-				
-				currentTab.setGraphic(new ImageView("play_small.png"));
-				currentTab.setClosable(false);
-			});
-			
-			do {
-				for (Command command : tabCommands.getItems()) {
+		if (controls.getState() == ControlBar.PAUSED) {
+			resumeMacros(currentTab);
+		} else {
+			task = executor.submit(() -> {	
+				try {
+					LOG.debug("Start playing macros");
+					controls.setState(ControlBar.PLAYING);
+					startGuiChanges(currentTab);
 					
-					/*
-					 * Pause (if requested) between commands;
-					 */
-					if (controls.getState() == ControlBar.PAUSED) {
-						try {
-							Platform.runLater(() -> {
-								currentTab.setGraphic(new ImageView("pause_small.png"));
-								currentTab.setCommandListDisable(false);
-								menu.setDisable(false);
-								commandListTabs.getTabs().stream()
-												.filter(tab -> !tab.equals(currentTab))
-												.forEach(e -> e.setDisable(false));
-							});
-							pauseBarrier.await();
-							Platform.runLater(() -> {
-								currentTab.setGraphic(new ImageView("play_small.png"));
-								currentTab.setCommandListDisable(true);
-								menu.setDisable(true);
-								commandListTabs.getTabs().stream()
-												.filter(tab -> !tab.equals(currentTab))
-												.forEach(e -> e.setDisable(true));
-								commandListTabs.getSelectionModel().select(currentTab);
-							});
-						} catch (InterruptedException e1) {
-							e1.printStackTrace();
+					do {
+						for (Command command : currentTab.getCommands().getItems()) {
+					
+							if (controls.getState() == ControlBar.PAUSED) {
+								pauseGuiChanges(currentTab);
+								pauseBarrier.await();
+								resumeGuiChanges(currentTab);
+							}
+							
+							stepGuiChanges(currentTab, command);
+							LOG.debug("Use command {}", command);
+							command.useCommand();
+
 						}
-					}
+						
+					} while (menu.isRepeat());
+				
+					LOG.debug("Finish playing macros");
+					controls.setState(ControlBar.STOPPED);
+					finishGuiChanges(currentTab);
 					
-					/*
-					 * Break if stopped;
-					 */
-					if (controls.getState() == ControlBar.STOPPED) {
-						Platform.runLater(() -> {
-							finishMacros(currentTab);
-						});
-						return;
-					}
-			
-					/*
-					 * UI "animation";
-					 */
-					Platform.runLater(() -> {
-						tabCommands.getSelectionModel().clearSelection();
-						tabCommands.getSelectionModel().select(command);	
-						status.setText("Using: " + command);
-					});
-					
-					/*
-					 * Core of this function;
-					 */
-					try {
-						command.useCommand();
-					} catch (InterruptedException e) {
-						//break if interrupted;
-						Platform.runLater(() -> {
-							finishMacros(currentTab);
-						});
-					}
+				} catch (InterruptedException exeption) {
+					stopGuiChanges(currentTab);
 				}
-			} while (menu.isRepeat());
-			
-			/*
-			 * UI "animation" for ends;
-			 */
-			Platform.runLater(() -> {
-				finishMacros(currentTab);
-				java.awt.Toolkit.getDefaultToolkit().beep();
-			});
-			
-		});	
-	
+			});	
+		}	
 	}
 	
 	
 	/**
-	 * Removing pause in "play" function.
+	 * Pause current macros.
 	 */
-	private void resumeMacros() {
+	private void pauseMacros() {
+		LOG.debug("Pause request");
+		controls.setState(ControlBar.PAUSED);
+	}
+	
+	
+	/**
+	 * Resume paused macros.
+	 */
+	private void resumeMacros(CommandListTab currentTab) {
+		LOG.debug("Resume macros");
+		controls.setState(ControlBar.PLAYING);
 		pauseBarrier.countDown();
 		pauseBarrier = new CountDownLatch(1);
 	}
 	
+	
 	/**
-	 * Finish macros event handler
+	 * Stop current macros.
 	 */
-	private void finishMacros(CommandListTab currentTab) {
-		commandListTabs.getTabs().stream() //enable other tabs
-						.filter(tab -> !tab.equals(currentTab))
-						.forEach(e -> e.setDisable(false));
-		menu.setDisable(false);
-		currentTab.setAddButtonDisable(false);
-		currentTab.setCommandListDisable(false);
-		
-		currentTab.setGraphic(null);
-		currentTab.setClosable(true);
-		currentTab.getCommands().getSelectionModel().clearSelection();
+	private void stopMacros() {
+		LOG.debug("Interrupt macros");
 		controls.setState(ControlBar.STOPPED);
-		status.setText("Finished!");
+		task.cancel(true);
 	}
+	
+	
+	/**
+	 * UI changes for start macros.
+	 */
+	private void startGuiChanges(CommandListTab currentTab) {
+		Platform.runLater(() -> {
+//			commandListTabs.getTabs().stream()
+//									.filter(tab -> !tab.equals(currentTab))
+//									.forEach(e -> e.setDisable(true));
+			
+//			menu.setDisable(true);
+			
+			currentTab.setAddButtonDisable(true);
+			currentTab.setCommandListDisable(true);
+			currentTab.setGraphic(new ImageView("play_small.png"));
+			currentTab.setClosable(false);
+		});
+	}
+	
+	
+	/**
+	 * UI changes for every step macros.
+	 */
+	private void stepGuiChanges(CommandListTab currentTab, Command command) {
+		Platform.runLater(() -> {
+			currentTab.getCommands().getSelectionModel().clearSelection();
+			currentTab.getCommands().getSelectionModel().select(command);
+			status.setText("Running: " + command);
+		});
+	}
+	
+	
+	/**
+	 * UI changes for finish macros.
+	 */
+	private void finishGuiChanges(CommandListTab currentTab) {
+		Platform.runLater(() -> {
+//			commandListTabs.getTabs().stream()
+//									.filter(tab -> !tab.equals(currentTab))
+//									.forEach(e -> e.setDisable(false));
+			
+//			menu.setDisable(false);
+			
+			currentTab.setAddButtonDisable(false);
+			currentTab.setCommandListDisable(false);
+			currentTab.setGraphic(null);
+			currentTab.setClosable(true);
+			
+			currentTab.getCommands().getSelectionModel().clearSelection();
+			status.setText("Finished!");
+			java.awt.Toolkit.getDefaultToolkit().beep();
+		});
+	}
+	
+	
+	/**
+	 * UI changes for pause macros.
+	 */
+	private void pauseGuiChanges(CommandListTab currentTab) {
+		Platform.runLater(() -> {
+//			commandListTabs.getTabs().stream()
+//							.filter(tab -> !tab.equals(currentTab))
+//							.forEach(e -> e.setDisable(false));
+
+//			menu.setDisable(false);
+
+			currentTab.setCommandListDisable(false);
+			currentTab.setGraphic(new ImageView("pause_small.png"));
+			status.setText("Paused..");
+		});
+	}
+	
+	
+	/**
+	 * UI changes for resuming after pause.
+	 */
+	private void resumeGuiChanges(CommandListTab currentTab) {
+		Platform.runLater(() -> {
+//			commandListTabs.getTabs().stream()
+//							.filter(tab -> !tab.equals(currentTab))
+//							.forEach(e -> e.setDisable(true));
+
+//			menu.setDisable(true);
+			
+			currentTab.setCommandListDisable(true);
+			currentTab.setGraphic(new ImageView("play_small.png"));
+		});
+	}
+	
+	
+	/**
+	 * UI changes for finish macros.
+	 */
+	private void stopGuiChanges(CommandListTab currentTab) {
+		Platform.runLater(() -> {
+			commandListTabs.getTabs().stream()
+									.filter(tab -> !tab.equals(currentTab))
+									.forEach(e -> e.setDisable(false));
+			
+			menu.setDisable(false);
+			
+			currentTab.setAddButtonDisable(false);
+			currentTab.setCommandListDisable(false);
+			currentTab.setGraphic(null);
+			currentTab.setClosable(true);
+			
+			status.setText("Stoped");
+		});
+	}
+	
 	
 	/**
 	 * Showing "save as" dialog with current tab name and write file.
@@ -421,6 +468,7 @@ public class App extends Application {
 		
 	}
 	
+	
 	/**
 	 * Rewrite current macros. If current macros never saved - using saveAs. 
 	 */
@@ -439,12 +487,12 @@ public class App extends Application {
 		}
 	}
 	
+	
 	/**
 	 * Core of saving macros.
 	 * @throws Exception 
 	 */
 	private void writeFile(ObservableList<Command> sourse, File destination) throws Exception {
-		
 		try (XMLEncoder encoder = new XMLEncoder(new FileOutputStream(destination))) {
 			
 			encoder.setPersistenceDelegate(Point2D.class, 
@@ -514,6 +562,7 @@ public class App extends Application {
 		
 		return commands;
 	}
+	
 	
 	public static void main(String[] args) {
 		launch(args);
