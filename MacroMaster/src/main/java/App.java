@@ -203,10 +203,10 @@ public class App extends Application {
 		/*
 		 * Open save dialog for menu;
 		 */
-		 fileChooser = new FileChooser();
-		 fileChooser.getExtensionFilters().addAll(
-		         new ExtensionFilter("XML macros", "*.xmlm"),
-		         new ExtensionFilter("All Files", "*.*"));
+		fileChooser = new FileChooser();
+		fileChooser.getExtensionFilters().addAll(
+				new ExtensionFilter("XML macros", "*.xmlm"),
+				new ExtensionFilter("All Files", "*.*"));
 
 
 		 /*
@@ -336,12 +336,6 @@ public class App extends Application {
 	 */
 	private void startGuiChanges(CommandListTab currentTab) {
 		Platform.runLater(() -> {
-//			commandListTabs.getTabs().stream()
-//									.filter(tab -> !tab.equals(currentTab))
-//									.forEach(e -> e.setDisable(true));
-			
-//			menu.setDisable(true);
-			
 			currentTab.setAddButtonDisable(true);
 			currentTab.setCommandListDisable(true);
 			currentTab.setGraphic(new ImageView("play_small.png"));
@@ -367,12 +361,6 @@ public class App extends Application {
 	 */
 	private void finishGuiChanges(CommandListTab currentTab) {
 		Platform.runLater(() -> {
-//			commandListTabs.getTabs().stream()
-//									.filter(tab -> !tab.equals(currentTab))
-//									.forEach(e -> e.setDisable(false));
-			
-//			menu.setDisable(false);
-			
 			currentTab.setAddButtonDisable(false);
 			currentTab.setCommandListDisable(false);
 			currentTab.setGraphic(null);
@@ -390,12 +378,6 @@ public class App extends Application {
 	 */
 	private void pauseGuiChanges(CommandListTab currentTab) {
 		Platform.runLater(() -> {
-//			commandListTabs.getTabs().stream()
-//							.filter(tab -> !tab.equals(currentTab))
-//							.forEach(e -> e.setDisable(false));
-
-//			menu.setDisable(false);
-
 			currentTab.setCommandListDisable(false);
 			currentTab.setGraphic(new ImageView("pause_small.png"));
 			status.setText("Paused..");
@@ -408,12 +390,6 @@ public class App extends Application {
 	 */
 	private void resumeGuiChanges(CommandListTab currentTab) {
 		Platform.runLater(() -> {
-//			commandListTabs.getTabs().stream()
-//							.filter(tab -> !tab.equals(currentTab))
-//							.forEach(e -> e.setDisable(true));
-
-//			menu.setDisable(true);
-			
 			currentTab.setCommandListDisable(true);
 			currentTab.setGraphic(new ImageView("play_small.png"));
 		});

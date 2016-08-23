@@ -198,6 +198,7 @@ public class CommandList extends TableView<Command> {
 			
 			fieldX.setOnKeyPressed(keyEvent);
 			fieldY.setOnKeyPressed(keyEvent);
+
 		}
 		
 		@Override

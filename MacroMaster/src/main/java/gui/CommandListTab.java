@@ -46,9 +46,23 @@ public class CommandListTab extends Tab {
 		newCommand.getItems().add((Command) blankCommand);
 				
 		addCommand.setOnAction(e -> {
-			Command command = newCommand.getItems().get(0);
-			commands.getItems().add((Command) command.clone());
-		});
+			Command command = (Command) blankCommand.clone();
+			commands.getItems().add(command);
+		});		
+		
+//		 commands.setOnDragDetected(e -> {
+//			 Image dragImage = new Image("github.png");
+//			
+//			 Dragboard db = commands.startDragAndDrop(TransferMode.ANY);
+//			 db.setDragView(dragImage, dragImage.getWidth()/2,
+//			 dragImage.getHeight()/2);
+//			
+//			 ClipboardContent cbc = new ClipboardContent();
+//			
+//			 Command inboundBean = (Command) commands.getSelectionModel().getSelectedItem();
+//			 cbc.putString(inboundBean.toString());
+//			 db.setContent(cbc);
+//		 });
 		
 		content.getChildren().addAll(commands, newCommand, addCommand);
 		setContent(content);
