@@ -19,9 +19,9 @@ public class ControlBar extends ToolBar {
 	public static final int STOPPED = 2;
 	public static final int PAUSED = 3;
 	
-	private Button play = new Button("\u25B6", new ImageView("play.png"));
-	private Button pause = new Button("ll", new ImageView("pause.png"));
-	private Button stop = new Button("\u25FC", new ImageView("stop.png"));
+	private Button play = new Button("\u25B6", new ImageView("img/play.png"));
+	private Button pause = new Button("ll", new ImageView("img/pause.png"));
+	private Button stop = new Button("\u25FC", new ImageView("img/stop.png"));
 	
 	private int currentState = STOPPED;
 	

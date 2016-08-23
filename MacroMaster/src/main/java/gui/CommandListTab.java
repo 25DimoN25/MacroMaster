@@ -4,10 +4,17 @@ import java.io.File;
 
 import command.Command;
 import command.CommandType;
+import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tab;
+import javafx.scene.control.TableRow;
+import javafx.scene.image.WritableImage;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 
@@ -50,19 +57,49 @@ public class CommandListTab extends Tab {
 			commands.getItems().add(command);
 		});		
 		
-//		 commands.setOnDragDetected(e -> {
-//			 Image dragImage = new Image("github.png");
-//			
-//			 Dragboard db = commands.startDragAndDrop(TransferMode.ANY);
-//			 db.setDragView(dragImage, dragImage.getWidth()/2,
-//			 dragImage.getHeight()/2);
-//			
-//			 ClipboardContent cbc = new ClipboardContent();
-//			
-//			 Command inboundBean = (Command) commands.getSelectionModel().getSelectedItem();
-//			 cbc.putString(inboundBean.toString());
-//			 db.setContent(cbc);
-//		 });
+		commands.setRowFactory(table -> new TableRow<Command>(){
+
+			@Override
+			protected void updateItem(Command command, boolean empty){
+				super.updateItem(command, empty);
+				if (command != null) {
+					setOnDragDetected(e -> {
+						ObservableList<Command> selectedCommands = table.getSelectionModel().getSelectedItems();
+
+						WritableImage dragImage = this.snapshot(new SnapshotParameters(), null);
+	
+						Dragboard dragboard = this.startDragAndDrop(TransferMode.MOVE);
+						dragboard.setDragView(dragImage, 
+									dragImage.getWidth()/2,
+									dragImage.getHeight()/2);
+						
+					
+						ClipboardContent content = new ClipboardContent();
+						content.putString(selectedCommands.toString());
+						
+						dragboard.setContent(content);
+					});
+					
+					setOnDragEntered(e -> {
+						this.setStyle("-fx-border-style: solid;"
+									+ "-fx-border-width: 2 0 0 0;"
+									+ "-fx-border-color: lightblue;");
+					});
+					
+					setOnDragExited(e -> {
+						this.setStyle(null);
+					});
+
+					setOnDragOver(e -> {
+						e.acceptTransferModes(TransferMode.MOVE);
+					});
+					
+					setOnDragDropped(e -> {
+						e.setDropCompleted(true);
+					});
+				}
+			}
+		});
 		
 		content.getChildren().addAll(commands, newCommand, addCommand);
 		setContent(content);

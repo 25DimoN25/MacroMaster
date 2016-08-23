@@ -188,7 +188,7 @@ public class App extends Application {
 		 * About dialog for menu;
 		 */
 		aboutDialog = new Alert(AlertType.INFORMATION);
-		Hyperlink link1 = new Hyperlink(null, new ImageView("github.png"));
+		Hyperlink link1 = new Hyperlink(null, new ImageView("img/github.png"));
 		link1.setOnAction(e -> {
 			getHostServices().showDocument("https://github.com/25DimoN25/MacroMaster");	
 		});
@@ -236,7 +236,7 @@ public class App extends Application {
 		primaryStage.setOnCloseRequest(e -> {
 			exit();
 		});
-		primaryStage.getIcons().add(new Image("icon.png"));
+		primaryStage.getIcons().add(new Image("img/icon.png"));
 		primaryStage.show();
 		
 		tutorialDialog.initOwner(primaryStage);
@@ -338,7 +338,7 @@ public class App extends Application {
 		Platform.runLater(() -> {
 			currentTab.setAddButtonDisable(true);
 			currentTab.setCommandListDisable(true);
-			currentTab.setGraphic(new ImageView("play_small.png"));
+			currentTab.setGraphic(new ImageView("img/play_small.png"));
 			currentTab.setClosable(false);
 		});
 	}
@@ -379,7 +379,7 @@ public class App extends Application {
 	private void pauseGuiChanges(CommandListTab currentTab) {
 		Platform.runLater(() -> {
 			currentTab.setCommandListDisable(false);
-			currentTab.setGraphic(new ImageView("pause_small.png"));
+			currentTab.setGraphic(new ImageView("img/pause_small.png"));
 			status.setText("Paused..");
 		});
 	}
@@ -391,7 +391,7 @@ public class App extends Application {
 	private void resumeGuiChanges(CommandListTab currentTab) {
 		Platform.runLater(() -> {
 			currentTab.setCommandListDisable(true);
-			currentTab.setGraphic(new ImageView("play_small.png"));
+			currentTab.setGraphic(new ImageView("img/play_small.png"));
 		});
 	}
 	
@@ -508,12 +508,13 @@ public class App extends Application {
 				newMacros.setCurrentFile(selectedFile);
 				newMacros.getCommands().getItems().addAll(commands);
 				commandListTabs.getTabs().add(newMacros);
+				commandListTabs.getSelectionModel().select(newMacros);
 				
+				status.setText("Opened!");
 			} catch (Exception exp) {
 				status.setText("Error: can't load " + selectedFile.getName());
 				exp.printStackTrace();
 			}
-			status.setText("Opened!");
 		}
 	}
 	
