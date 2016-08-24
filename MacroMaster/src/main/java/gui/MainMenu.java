@@ -23,7 +23,7 @@ public class MainMenu extends MenuBar {
 	private MenuItem exit = new MenuItem("Exit");
 	private CheckMenuItem repeat = new CheckMenuItem("Repeat");
 	private MenuItem tutorial = new MenuItem("Tutorial");
-	private MenuItem hotkeys = new MenuItem("Hotheys");
+	private MenuItem hotkeys = new MenuItem("Hotkeys");
 	private MenuItem about = new MenuItem("About");
 	
 	public MainMenu() {

@@ -65,7 +65,6 @@ public class App extends Application {
 	
 	private FileChooser fileChooser;
 	
-
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -150,21 +149,31 @@ public class App extends Application {
 		 * Tutorial dialog for menu;
 		 */
 		tutorialDialog = new Alert(AlertType.NONE);
-		tutorialDialog.setContentText("Tutorial:\n\n"
-									+ "1. Click File -> New macros to create new macros;\n\n"
-									+ "2. Configure fields with command parameters upper \"Add command\" button."
-									+ "You can combine any actions with mouse and keyboard in one command;\n\n"
-									+ "3. Press \"Add command\" to add your new command;\n\n"
-									+ "4. After making macros - you can run it. Press play button;\n\n"
-									+ "5. You can edit your current macros at pause;\n\n"
-									+ "6. You can add or remove (DELETE key) commands only in stopped state;\n\n"
-									+ "7. Pause button stops macros only between commands (i.e. its not work"
-									+ "with #BIG_NUMBER#-counted commands);\n\n"
-									+ "8. Stop button can interrupt macros at any time;\n\n"
-									+ "!!new!!\n\n"
-									+ "9. Right click to show copy/cut/paste context menu;\n\n"
-									+ "10. Else you can use standart hotkeys (CTRL+X/C/V);\n\n"
-									+ "11. Use mouse to move rows and change they position;");
+		tutorialDialog.setContentText(
+									  "New macros:\n"
+									+ "Click File -> New to create a new macros;\n\n"
+											  
+									+ "Add commands:\n"
+									+ "Configure table row, positioned highter \"Add command\" button, set the necessary parameters "
+									+ "and press Add button. You can combine any actions with mouse and keyboard in one command;\n\n"
+									
+									+ "Run macros:\n"
+									+ "You can run your macros in the current tab. Press play button;\n\n"
+									
+									+ "Pause macros:\n"
+									+ "You can edit your current macros at pause. Pause button stops macros only between commands "
+									+ "(i.e. its not working with #BIG_NUMBER#-counted commands);\n\n"
+									
+									+ "Stop macros:\n"
+									+ "You can add or remove commands only in stopped state. Stop button can interrupt macros "
+									+ "at any time;\n\n"
+									
+									+ "Editing:\n"
+									+ "You can move rows, change they position using mouse drag gesture. You can use default hotkeys "
+									+ "to delete selected rows (DELETE button), copy (CTRL+C), cut (CTRL+X) and paste (CTRL+V);\n\n"
+									
+									+ "Save/Open:\n"
+									+ "You can save your current macros in XML format, use File->Save. For open use File->Open;");
 		tutorialDialog.setTitle("Tutorial");
 		tutorialDialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
 		
@@ -192,7 +201,7 @@ public class App extends Application {
 		aboutDialog.setGraphic(link1);
 		aboutDialog.setHeaderText("MacroMaster - simple program to make simple macroses!");
 		aboutDialog.setContentText("Version " + VER + "\n\n"
-								 + "By Saltykov D.\n\n"
+								 + "By Saltykov Dmitry, 2016 ©\n\n"
 								 + "Click to image and visit GitHub for more information.");
 		aboutDialog.setTitle("About");
 		

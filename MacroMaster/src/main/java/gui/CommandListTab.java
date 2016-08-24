@@ -66,6 +66,7 @@ public class CommandListTab extends Tab {
 		commands.setRowFactory(table -> new MoveableRow((CommandList) table));
 		contextMenu.setOnActionCopy(e -> copy());
 		contextMenu.setOnActionCut(e -> cut());
+		contextMenu.setOnActionDelete(e -> removeSelected());
 		contextMenu.setOnActionPaste(e -> paste());
 		commands.setContextMenu(contextMenu);
 		
