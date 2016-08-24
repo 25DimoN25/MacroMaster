@@ -160,7 +160,11 @@ public class App extends Application {
 									+ "6. You can add or remove (DELETE key) commands only in stopped state;\n\n"
 									+ "7. Pause button stops macros only between commands (i.e. its not work"
 									+ "with #BIG_NUMBER#-counted commands);\n\n"
-									+ "8. Stop button can interrupt macros at any time;");
+									+ "8. Stop button can interrupt macros at any time;\n"
+									+ "!!new!!\n"
+									+ "9. Right click to show copy/cut/paste context menu;"
+									+ "10. Else you can use standart hotkeys (CTRL+X/C/V);"
+									+ "11. Use mouse to move rows and change they position;");
 		tutorialDialog.setTitle("Tutorial");
 		tutorialDialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
 		
