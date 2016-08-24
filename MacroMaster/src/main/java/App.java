@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import com.tulskiy.keymaster.common.Provider;
 
 import command.Command;
-import gui.CommandList;
 import gui.CommandListTab;
 import gui.ControlBar;
 import gui.MainMenu;
@@ -33,7 +32,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TabPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -45,7 +43,8 @@ import javafx.stage.Stage;
  * JavaFX Application.
  */
 public class App extends Application {
-	private static final String VER = "1.2.5-RELEASE";
+	private static final String VER = "1.3.0-RELEASE";
+	private static final Logger LOG = LoggerFactory.getLogger(App.class);
 	
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
 	private CountDownLatch pauseBarrier = new CountDownLatch(1);
@@ -66,7 +65,7 @@ public class App extends Application {
 	
 	private FileChooser fileChooser;
 	
-	private final Logger LOG = LoggerFactory.getLogger(App.class);
+
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -100,12 +99,6 @@ public class App extends Application {
 		menu.setSaveDisable(true);
 		menu.setOnActionNew(e -> {
 			CommandListTab tab = new CommandListTab("New macros " + newMacrosId);
-			CommandList commands = tab.getCommands();
-			commands.setOnKeyPressed(e2 -> {
-				if (e2.getCode() == KeyCode.DELETE && controls.getState() == ControlBar.STOPPED) {
-					commands.getItems().removeAll(commands.getSelectionModel().getSelectedItems());
-				}
-			});
 			commandListTabs.getTabs().add(tab);
 			newMacrosId++;
 		});
@@ -340,6 +333,7 @@ public class App extends Application {
 			currentTab.setCommandListDisable(true);
 			currentTab.setGraphic(new ImageView("img/play_small.png"));
 			currentTab.setClosable(false);
+			currentTab.getCommands().setEditable(false);
 		});
 	}
 	
@@ -365,6 +359,7 @@ public class App extends Application {
 			currentTab.setCommandListDisable(false);
 			currentTab.setGraphic(null);
 			currentTab.setClosable(true);
+			currentTab.getCommands().setEditable(true);
 			
 			currentTab.getCommands().getSelectionModel().clearSelection();
 			status.setText("Finished!");
