@@ -43,7 +43,7 @@ import javafx.stage.Stage;
  * JavaFX Application.
  */
 public class App extends Application {
-	private static final String VER = "1.3.0-RELEASE";
+	private static final String VER = "1.3.1-RELEASE";
 	private static final Logger LOG = LoggerFactory.getLogger(App.class);
 	
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
