@@ -4,6 +4,7 @@ import java.io.File;
 
 import command.Command;
 import command.CommandType;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.SnapshotParameters;
@@ -32,8 +33,7 @@ public class CommandListTab extends Tab {
 	private Command blankCommand = new Command(CommandType.CLICK, null, MouseButton.PRIMARY, null, 1, 100);
 	
 	private File currentFile;
-	
-	
+		
 	public CommandListTab(String title) {
 		VBox content = new VBox(3);
 		content.setAlignment(Pos.CENTER);
@@ -57,49 +57,7 @@ public class CommandListTab extends Tab {
 			commands.getItems().add(command);
 		});		
 		
-		commands.setRowFactory(table -> new TableRow<Command>(){
-
-			@Override
-			protected void updateItem(Command command, boolean empty){
-				super.updateItem(command, empty);
-				if (command != null) {
-					setOnDragDetected(e -> {
-						ObservableList<Command> selectedCommands = table.getSelectionModel().getSelectedItems();
-
-						WritableImage dragImage = this.snapshot(new SnapshotParameters(), null);
-	
-						Dragboard dragboard = this.startDragAndDrop(TransferMode.MOVE);
-						dragboard.setDragView(dragImage, 
-									dragImage.getWidth()/2,
-									dragImage.getHeight()/2);
-						
-					
-						ClipboardContent content = new ClipboardContent();
-						content.putString(selectedCommands.toString());
-						
-						dragboard.setContent(content);
-					});
-					
-					setOnDragEntered(e -> {
-						this.setStyle("-fx-border-style: solid;"
-									+ "-fx-border-width: 2 0 0 0;"
-									+ "-fx-border-color: lightblue;");
-					});
-					
-					setOnDragExited(e -> {
-						this.setStyle(null);
-					});
-
-					setOnDragOver(e -> {
-						e.acceptTransferModes(TransferMode.MOVE);
-					});
-					
-					setOnDragDropped(e -> {
-						e.setDropCompleted(true);
-					});
-				}
-			}
-		});
+		commands.setRowFactory(table -> new MoveableRow((CommandList) table));
 		
 		content.getChildren().addAll(commands, newCommand, addCommand);
 		setContent(content);
@@ -124,5 +82,90 @@ public class CommandListTab extends Tab {
 	
 	public void setCommandListDisable(boolean disable) {
 		commands.setEditable(!disable);
+	}
+	
+	
+	private static class MoveableRow extends TableRow<Command> {
+		private static boolean dropCompleted;
+		private static ObservableList<Command> selectedCommands = FXCollections.observableArrayList();
+		private static ObservableList<Command> originalCommands = FXCollections.observableArrayList();
+		
+		private CommandList table;
+
+		public MoveableRow(CommandList table) {
+			this.table = table;
+		}
+		
+		@Override
+		protected void updateItem(Command command, boolean empty){
+			super.updateItem(command, empty);
+			if (command != null) {
+				
+				setOnDragDetected(e -> {
+					dropCompleted = false;
+					
+					selectedCommands.addAll(table.getSelectionModel().getSelectedItems());
+					originalCommands.addAll(table.getItems());
+								
+					WritableImage dragImage = snapshot(new SnapshotParameters(), null);
+					
+					table.getSelectionModel().clearSelection();
+					table.getItems().removeAll(selectedCommands);
+					
+					Dragboard dragboard = startDragAndDrop(TransferMode.MOVE);
+					dragboard.setDragView(dragImage, 
+								dragImage.getWidth()/2,
+								dragImage.getHeight()/2);
+
+					ClipboardContent content = new ClipboardContent();
+					content.putString(selectedCommands.toString());
+					dragboard.setContent(content);
+				});
+				
+			}
+			
+			setOnDragEntered(e -> {
+				setStyle("-fx-border-style: solid;"
+						+ "-fx-border-width: 2 0 0 0;"
+						+ "-fx-border-color: lightblue;");
+			});
+			
+			setOnDragExited(e -> {
+				setStyle(null);
+			});
+
+			setOnDragOver(e -> {
+				if (selectedCommands.size() > 0) {
+					e.acceptTransferModes(TransferMode.MOVE);	
+				} else {
+					e.acceptTransferModes(TransferMode.NONE);
+				}
+				
+			});
+			
+			setOnDragDropped(e -> {
+				
+				if (getIndex() >= table.getItems().size()) {	
+					table.getItems().addAll(table.getItems().size(), selectedCommands);
+					table.getSelectionModel().selectRange(table.getItems().size() - selectedCommands.size(), table.getItems().size());
+				} else {
+					table.getItems().addAll(getIndex(), selectedCommands);
+					table.getSelectionModel().selectRange(getIndex(), getIndex() + selectedCommands.size());
+				}			
+				
+				dropCompleted = true;
+			});
+			
+			setOnDragDone(e -> {
+				if (!dropCompleted) {
+					table.getItems().clear();
+					table.getItems().addAll(originalCommands);
+				}
+				
+				selectedCommands.clear();
+				originalCommands.clear();
+			});
+			
+		}
 	}
 }
