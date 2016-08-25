@@ -17,6 +17,7 @@ import com.tulskiy.keymaster.common.Provider;
 import command.Command;
 import gui.CommandListTab;
 import gui.ControlBar;
+import gui.DropFileOverlay;
 import gui.MainMenu;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -32,6 +33,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TabPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -43,7 +45,7 @@ import javafx.stage.Stage;
  * JavaFX Application.
  */
 public class App extends Application {
-	private static final String VER = "1.3.1-RELEASE";
+	private static final String VER = "1.3.2-RELEASE";
 	private static final Logger LOG = LoggerFactory.getLogger(App.class);
 	
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -124,7 +126,7 @@ public class App extends Application {
 			save(primaryStage);
 		});
 		menu.setOnActionOpen(e -> {
-			open(primaryStage);
+			open(primaryStage, null);
 		});
 
 		
@@ -173,7 +175,8 @@ public class App extends Application {
 									+ "to delete selected rows (DELETE button), copy (CTRL+C), cut (CTRL+X) and paste (CTRL+V);\n\n"
 									
 									+ "Save/Open:\n"
-									+ "You can save your current macros in XML format, use File->Save. For open use File->Open;");
+									+ "You can save your current macros in XML format, use File->Save. For open use File->Open or move "
+									+ "file on the MacroMaster from system explorer;");
 		tutorialDialog.setTitle("Tutorial");
 		tutorialDialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
 		
@@ -236,7 +239,18 @@ public class App extends Application {
 		rootPane.setTop(new VBox(menu, controls));
 		rootPane.setCenter(new StackPane(new Label("Press File -> New"), commandListTabs));
 		
-		Scene scene = new Scene(rootPane, 600, 500);
+		DropFileOverlay overlay = new DropFileOverlay();
+		Scene scene = new Scene(new StackPane(rootPane, overlay), 600, 500);
+		scene.setOnDragOver(e -> {
+			 if (e.getDragboard().hasFiles()) {
+                 e.acceptTransferModes(TransferMode.COPY);
+             }
+		});
+		scene.setOnDragEntered(e -> overlay.setVisible(true));
+		scene.setOnDragExited(e -> overlay.setVisible(false));
+		scene.setOnDragDropped(e ->	e.getDragboard().getFiles()
+									 .forEach(file -> open(primaryStage, file)));
+		
 		primaryStage.setScene(scene);	
 		primaryStage.setTitle("MacroMaster");
 		primaryStage.setOnCloseRequest(e -> {
@@ -248,7 +262,7 @@ public class App extends Application {
 		tutorialDialog.initOwner(primaryStage);
 		hotkeysDialog.initOwner(primaryStage);
 		aboutDialog.initOwner(primaryStage);
-		
+
 	}
 
 	
@@ -497,11 +511,18 @@ public class App extends Application {
 	
 	
 	/**
-	 * Show file open dialog, read file and creating tab with this file macros.
+	 * Show file open dialog (or open file from parameter), read file and creating tab with this file macros.
 	 */
-	private void open(Stage owner) {
-		fileChooser.setTitle("Open macros");
-		File selectedFile = fileChooser.showOpenDialog(owner);
+	private void open(Stage owner, File file) {
+		File selectedFile = null;
+		
+		if (file == null) {
+			fileChooser.setTitle("Open macros");
+			selectedFile = fileChooser.showOpenDialog(owner);
+		} else {
+			selectedFile = file;
+		}
+
 		if (selectedFile != null) {
 			fileChooser.setInitialDirectory(selectedFile.getParentFile());
 			try {
