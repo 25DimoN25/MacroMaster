@@ -1,9 +1,9 @@
 package gui.commandlist;
-
 import command.Command;
 import javafx.beans.binding.Bindings;
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
+import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TextField;
@@ -22,7 +22,10 @@ import javafx.scene.layout.HBox;
 public class PointTableCell extends TableCell<Command, Point2D> {
 	private TextField fieldX;
 	private TextField fieldY;
+	private Button getCoordsButton;	
 	private HBox pane;
+	
+	private static CoordinatesOverlay overlay = new CoordinatesOverlay();
 	
 	public PointTableCell() {
 		fieldX = new TextField();
@@ -33,21 +36,39 @@ public class PointTableCell extends TableCell<Command, Point2D> {
 		fieldY.setPromptText("y");
 		fieldY.setTextFormatter(new TextFormatter<>(e -> e.getControlNewText().matches("\\d{0,5}") ? e : null));
 
+		getCoordsButton = new Button("*");
+		getCoordsButton.setMaxWidth(25);
+		getCoordsButton.setMinWidth(25);
+		getCoordsButton.setPrefWidth(25);
+		getCoordsButton.setOnAction(e -> {
+			Point2D point = overlay.showOverlay();
+			if (point != null) {
+				fieldX.setText(String.valueOf((int) point.getX()));
+				fieldY.setText(String.valueOf((int) point.getY()));
+				setText("x:" + (int) point.getX() + ", y:" + (int) point.getY());	
+				commitEdit(point);
+			} else {
+				cancelEdit();
+			}
+		});
+		
+		
 		/*
 		 * Auto-width (3px for borders of textfield);
 		 */
-		widthProperty().addListener((obs, oldV, newV) -> {
-			fieldX.setMaxWidth(newV.intValue()/2-3);
-			fieldX.setMinWidth(newV.intValue()/2-3);
-			fieldX.setPrefWidth(newV.intValue()/2-3);
-			
-			fieldY.setMaxWidth(newV.intValue()/2-3);
-			fieldY.setMinWidth(newV.intValue()/2-3);
-			fieldY.setPrefWidth(newV.intValue()/2-3);
+		widthProperty().addListener((obs, oldValue, newValue) -> {
+			double width = (newValue.intValue() / 2) - (getCoordsButton.getPrefWidth() / 2) - 3;
+			fieldX.setMaxWidth(width);
+			fieldX.setMinWidth(width);
+			fieldX.setPrefWidth(width);
+
+			fieldY.setMaxWidth(width);
+			fieldY.setMinWidth(width);
+			fieldY.setPrefWidth(width);
 		});
 		
-		pane = new HBox(fieldX, fieldY);
-		
+		pane = new HBox(fieldX, fieldY, getCoordsButton);
+
 		/*
 		 * bind display type to editing state;
 		 */
@@ -56,6 +77,7 @@ public class PointTableCell extends TableCell<Command, Point2D> {
 						.then(ContentDisplay.GRAPHIC_ONLY)
 						.otherwise(ContentDisplay.TEXT_ONLY)
 				);
+		
 		
 		/*
 		 * ESC - cancel editing, ENTER - accept changes;
@@ -78,8 +100,8 @@ public class PointTableCell extends TableCell<Command, Point2D> {
 		
 		fieldX.setOnKeyPressed(keyEvent);
 		fieldY.setOnKeyPressed(keyEvent);
-
 	}
+	
 	
 	@Override
 	protected void updateItem(Point2D item, boolean empty) {

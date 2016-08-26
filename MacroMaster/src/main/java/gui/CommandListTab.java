@@ -17,7 +17,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableRow;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 
@@ -33,12 +32,13 @@ public class CommandListTab extends Tab {
 	private CommandList commands = new CommandList();
 	private CommandList newCommand = new CommandList();
 	private Button addCommand = new Button("add command");
-	private Command blankCommand = new Command(CommandType.CLICK, null, MouseButton.PRIMARY, null, 1, 100);
+	private Command blankCommand = new Command(CommandType.CLICK, null, null, null, 1, 100);
 	private CopyPasteContextMenu contextMenu = new CopyPasteContextMenu();
 	
 	private File currentFile;
 	
 	private ObservableList<Command> cuttedCommands = FXCollections.observableArrayList();
+	
 	
 	public CommandListTab(String title) {
 		VBox content = new VBox(3);
@@ -81,6 +81,7 @@ public class CommandListTab extends Tab {
 		setContent(content);
 		setText(title);
 		
+		
 		/*
 		 * Register hotkeys to delete and copy/cut/paste;
 		 */
@@ -113,6 +114,9 @@ public class CommandListTab extends Tab {
 	}
 	
 	
+	/**
+	 * Copy selected commands;
+	 */
 	private void copy() {
 		contextMenu.setPasteDisable(false);
 		ObservableList<Command> selectedCommands = commands.getSelectionModel().getSelectedItems();
@@ -123,13 +127,18 @@ public class CommandListTab extends Tab {
 		LOG.debug("Copied {} command(s)", selectedCommands.size());
 	}
 	
-	
+	/**
+	 * Copy and remove selected commands;
+	 */
 	private void cut() {
 		copy();
 		removeSelected();
 	}
 	
 	
+	/**
+	 * Paste copied commands after selected items;
+	 */
 	private void paste() {
 		ObservableList<Command> selectedCommands = commands.getSelectionModel().getSelectedItems();
 		if (selectedCommands.size() > 0) {
@@ -151,6 +160,9 @@ public class CommandListTab extends Tab {
 	}
 	
 	
+	/**
+	 * Delete selected commands;
+	 */
 	private void removeSelected() {
 		ObservableList<Command> selectedCommands = FXCollections.observableArrayList(commands.getSelectionModel().getSelectedItems());
 		commands.getSelectionModel().clearSelection();
@@ -170,6 +182,7 @@ public class CommandListTab extends Tab {
 		this.currentFile = currentFile;
 	}
 
+	
 	public CommandList getCommands() {
 		return commands;
 	}

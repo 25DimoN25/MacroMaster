@@ -7,5 +7,16 @@ package command;
  *
  */
 public enum CommandType {
-	PRESS, RELEASE, CLICK;
+	PRESS("Press"), RELEASE("Release"), CLICK("Type/Click");
+	
+	private String toStringValue;
+	
+	private CommandType(String toStringValue) {
+		this.toStringValue = toStringValue;
+	}
+	
+	@Override
+	public String toString() {
+		return toStringValue;
+	}
 }

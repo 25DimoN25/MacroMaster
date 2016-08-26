@@ -48,8 +48,7 @@ public class KeyTableCell extends TableCell<Command, KeyCode> {
 		});
 		comboBox.getEditor().setOnKeyPressed(comboBox.getOnKeyPressed());
 		
-		comboBox.valueProperty().addListener((obs, oldValue, newValue) -> {
-			comboBox.setValue(newValue);		
+		comboBox.valueProperty().addListener((obs, oldValue, newValue) -> {	
 			setText(newValue == null ? null : newValue.toString());
 			commitEdit(newValue);	
 		});

@@ -98,26 +98,25 @@ public class CommandList extends TableView<Command> {
 		/*
 		 * Configuring 5th column for displaying and editing count of using commands;
 		 */
-		TableColumn<Command, Number> ñountColumn = new TableColumn<>("Count"); 
-		ñountColumn.setCellValueFactory(new PropertyValueFactory<>("count"));
-		ñountColumn.setSortable(false);
-		ñountColumn.setCellFactory(TextFieldTableCell.<Command, Number>forTableColumn(new NumberStringConverter()));
-		ñountColumn.setOnEditCommit(t -> {
+		TableColumn<Command, Number> countColumn = new TableColumn<>("Count"); 
+		countColumn.setCellValueFactory(new PropertyValueFactory<>("count"));
+		countColumn.setSortable(false);
+		countColumn.setCellFactory(TextFieldTableCell.<Command, Number>forTableColumn(new NumberStringConverter()));
+		countColumn.setOnEditCommit(t -> {
 			t.getTableView().getItems().get(t.getTablePosition().getRow()).setCount(t.getNewValue().intValue());
 		});
-		getColumns().add(ñountColumn);
-		
+		getColumns().add(countColumn);
 		
 		/*
 		 * Configuring 6th column for displaying and editing type of delay of command;
 		 */
 		TableColumn<Command, Number> delayColumn = new TableColumn<>("Delay (ms)"); 
 		delayColumn.setCellValueFactory(new PropertyValueFactory<>("delay"));
+		delayColumn.setSortable(false);
 		delayColumn.setCellFactory(TextFieldTableCell.<Command, Number>forTableColumn(new NumberStringConverter()));
 		delayColumn.setOnEditCommit(t -> {
 			t.getTableView().getItems().get(t.getTablePosition().getRow()).setDelay(t.getNewValue().intValue());
 		});
-		delayColumn.setSortable(false);
 		getColumns().add(delayColumn);
 
 	}
