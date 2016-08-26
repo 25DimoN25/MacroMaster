@@ -246,7 +246,11 @@ public class App extends Application {
                  e.acceptTransferModes(TransferMode.COPY);
              }
 		});
-		scene.setOnDragEntered(e -> overlay.setVisible(true));
+		scene.setOnDragEntered(e -> {
+			if (e.getDragboard().hasFiles()) {
+				overlay.setVisible(true);
+			}
+		});
 		scene.setOnDragExited(e -> overlay.setVisible(false));
 		scene.setOnDragDropped(e ->	e.getDragboard().getFiles()
 									 .forEach(file -> open(primaryStage, file)));

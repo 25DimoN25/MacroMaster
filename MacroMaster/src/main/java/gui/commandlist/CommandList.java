@@ -52,38 +52,21 @@ public class CommandList extends TableView<Command> {
 		
 		
 		/*
-		 * Configuring 2nd column for displaying and editing pressing key of keyboard;
+		 * Configuring 3rd column for displaying and editing key of mouse;
 		 */
-		TableColumn<Command, KeyCode> mouseButtonColumn = new TableColumn<>("Keyboard key");
-		mouseButtonColumn.setCellValueFactory(new PropertyValueFactory<>("key"));
+		TableColumn<Command, MouseButton> mouseButtonColumn = new TableColumn<>("Mouse button"); 
+		mouseButtonColumn.setCellValueFactory(new PropertyValueFactory<>("mbutton"));
 		mouseButtonColumn.setSortable(false);
 		
-		ObservableList<KeyCode> mouseButtonColumnData = FXCollections.observableArrayList(KeyCode.class.getEnumConstants());
+		ObservableList<MouseButton> mouseButtonColumnData = FXCollections.observableArrayList(MouseButton.class.getEnumConstants());
 		mouseButtonColumnData.add(0, null);
+		mouseButtonColumnData.remove(MouseButton.NONE);
 		
 		mouseButtonColumn.setCellFactory(ComboBoxTableCell.forTableColumn(mouseButtonColumnData));
 		mouseButtonColumn.setOnEditCommit(t -> {
-			t.getTableView().getItems().get(t.getTablePosition().getRow()).setKey(t.getNewValue());
-		});
-		getColumns().add(mouseButtonColumn);
-		
-		
-		/*
-		 * Configuring 3rd column for displaying and editing key of mouse;
-		 */
-		TableColumn<Command, MouseButton> keyboardKeyColumn = new TableColumn<>("Mouse button"); 
-		keyboardKeyColumn.setCellValueFactory(new PropertyValueFactory<>("mbutton"));
-		keyboardKeyColumn.setSortable(false);
-		
-		ObservableList<MouseButton> keyboardKeyColumnData = FXCollections.observableArrayList(MouseButton.class.getEnumConstants());
-		keyboardKeyColumnData.add(0, null);
-		keyboardKeyColumnData.remove(MouseButton.NONE);
-		
-		keyboardKeyColumn.setCellFactory(ComboBoxTableCell.forTableColumn(keyboardKeyColumnData));
-		keyboardKeyColumn.setOnEditCommit(t -> {
 			t.getTableView().getItems().get(t.getTablePosition().getRow()).setMbutton(t.getNewValue());
 		});
-		getColumns().add(keyboardKeyColumn);
+		getColumns().add(mouseButtonColumn);
 		
 		
 		/*
@@ -97,6 +80,19 @@ public class CommandList extends TableView<Command> {
 			t.getTableView().getItems().get(t.getTablePosition().getRow()).setCoordinates(t.getNewValue());
 		});
 		getColumns().add(coordinatesColumn);
+		
+		
+		/*
+		 * Configuring 2nd column for displaying and editing pressing key of keyboard;
+		 */
+		TableColumn<Command, KeyCode> keyboardKeyColumn = new TableColumn<>("Keyboard key");
+		keyboardKeyColumn.setCellValueFactory(new PropertyValueFactory<>("key"));
+		keyboardKeyColumn.setSortable(false);
+		keyboardKeyColumn.setCellFactory(e -> new KeyTableCell());
+		keyboardKeyColumn.setOnEditCommit(t -> {
+			t.getTableView().getItems().get(t.getTablePosition().getRow()).setKey(t.getNewValue());
+		});
+		getColumns().add(keyboardKeyColumn);
 		
 		
 		/*

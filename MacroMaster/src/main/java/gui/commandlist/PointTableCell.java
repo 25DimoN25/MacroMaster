@@ -20,15 +20,17 @@ import javafx.scene.layout.HBox;
  * 
  */
 public class PointTableCell extends TableCell<Command, Point2D> {
-	TextField fieldX;
-	TextField fieldY;
-	HBox pane;
+	private TextField fieldX;
+	private TextField fieldY;
+	private HBox pane;
 	
 	public PointTableCell() {
 		fieldX = new TextField();
+		fieldX.setPromptText("x");
 		fieldX.setTextFormatter(new TextFormatter<>(e -> e.getControlNewText().matches("\\d{0,5}") ? e : null));
 		
 		fieldY = new TextField();
+		fieldY.setPromptText("y");
 		fieldY.setTextFormatter(new TextFormatter<>(e -> e.getControlNewText().matches("\\d{0,5}") ? e : null));
 
 		/*

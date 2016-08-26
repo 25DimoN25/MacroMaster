@@ -15,6 +15,7 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tab;
+import javafx.scene.control.TableRow;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Pane;
@@ -56,12 +57,18 @@ public class CommandListTab extends Tab {
 			}
 		});
 		newCommand.getItems().add((Command) blankCommand);
-
+		newCommand.setRowFactory(table -> new TableRow<Command>() {
+			@Override
+			protected void updateItem(Command command, boolean empty) {
+				setFocusTraversable(false);
+			}
+		});
+		
 		addCommand.setOnAction(e -> {
 			Command command = (Command) blankCommand.clone();
 			commands.getItems().add(command);
 			LOG.debug("Added command: {}", command);
-		});		
+		});	
 		
 		commands.setRowFactory(table -> new MoveableRow((CommandList) table));
 		contextMenu.setOnActionCopy(e -> copy());
