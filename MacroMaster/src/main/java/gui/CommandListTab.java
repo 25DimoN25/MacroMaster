@@ -44,6 +44,7 @@ public class CommandListTab extends Tab {
 		VBox content = new VBox(3);
 		content.setAlignment(Pos.CENTER);
 		
+		newCommand.bindColumnsWidthTo(commands);
 		newCommand.setPrefHeight(32);
 		newCommand.setMinHeight(32);
 		newCommand.setMaxHeight(32);

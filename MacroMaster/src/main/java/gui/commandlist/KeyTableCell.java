@@ -60,9 +60,7 @@ public class KeyTableCell extends TableCell<Command, KeyCode> {
 		contentDisplayProperty().bind(
 				Bindings.when(editingProperty())
 						.then(ContentDisplay.GRAPHIC_ONLY)
-						.otherwise(ContentDisplay.TEXT_ONLY)
-				);
-		
+						.otherwise(ContentDisplay.TEXT_ONLY));
 	}
 	
 	@Override

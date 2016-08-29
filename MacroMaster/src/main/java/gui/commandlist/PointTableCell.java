@@ -66,18 +66,7 @@ public class PointTableCell extends TableCell<Command, Point2D> {
 			fieldY.setMinWidth(width);
 			fieldY.setPrefWidth(width);
 		});
-		
-		pane = new HBox(fieldX, fieldY, getCoordsButton);
 
-		/*
-		 * bind display type to editing state;
-		 */
-		contentDisplayProperty().bind(
-				Bindings.when(editingProperty())
-						.then(ContentDisplay.GRAPHIC_ONLY)
-						.otherwise(ContentDisplay.TEXT_ONLY)
-				);
-		
 		
 		/*
 		 * ESC - cancel editing, ENTER - accept changes;
@@ -100,6 +89,17 @@ public class PointTableCell extends TableCell<Command, Point2D> {
 		
 		fieldX.setOnKeyPressed(keyEvent);
 		fieldY.setOnKeyPressed(keyEvent);
+		
+		pane = new HBox(fieldX, fieldY, getCoordsButton);
+		
+		
+		/*
+		 * bind display type to editing state;
+		 */
+		contentDisplayProperty().bind(
+				Bindings.when(editingProperty())
+						.then(ContentDisplay.GRAPHIC_ONLY)
+						.otherwise(ContentDisplay.TEXT_ONLY));
 	}
 	
 	
@@ -123,4 +123,5 @@ public class PointTableCell extends TableCell<Command, Point2D> {
 			setText(null);
 		}
 	}
+	
 }

@@ -1,5 +1,7 @@
 package gui.commandlist;
 
+import com.sun.javafx.scene.control.skin.TableHeaderRow;
+
 import command.Command;
 import command.CommandType;
 import javafx.collections.FXCollections;
@@ -32,6 +34,15 @@ public class CommandList extends TableView<Command> {
 		setPlaceholder(new Label("No commands"));
 		setFixedCellSize(30);
 		getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+		/*
+		 * Disable reordering;
+		 */
+		widthProperty().addListener((obs, oldValue, newValue) -> {
+			TableHeaderRow header = (TableHeaderRow) lookup("TableHeaderRow");
+			header.reorderingProperty().addListener((obs2, oldValue2, newValue2) -> {
+				header.setReordering(false);
+			});
+		});
 		
 		
 		/*
@@ -119,6 +130,17 @@ public class CommandList extends TableView<Command> {
 		});
 		getColumns().add(delayColumn);
 
+	}
+	
+	public void bindColumnsWidthTo(CommandList otherList) {
+		ObservableList<TableColumn<Command, ?>> mainColumns = getColumns();
+		ObservableList<TableColumn<Command, ?>> otherColumns = otherList.getColumns();
+		
+		for (int i = 0; i < mainColumns.size(); i++) { //0.5 for borders (anti horizontal scrolling);
+			mainColumns.get(i).prefWidthProperty().bind(otherColumns.get(i).widthProperty().subtract(0.5));
+			mainColumns.get(i).minWidthProperty().bind(otherColumns.get(i).widthProperty().subtract(0.5));
+			mainColumns.get(i).maxWidthProperty().bind(otherColumns.get(i).widthProperty().subtract(0.5));
+		}
 	}
 		
 }

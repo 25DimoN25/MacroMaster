@@ -23,6 +23,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Dimension2D;
 import javafx.geometry.Point2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -33,6 +34,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TabPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
@@ -241,6 +243,18 @@ public class App extends Application {
 		
 		DropFileOverlay overlay = new DropFileOverlay();
 		Scene scene = new Scene(new StackPane(rootPane, overlay), 600, 500);
+		/*
+		 * Hotkeys to open/save;
+		 */
+		scene.setOnKeyPressed(e -> {
+			if (e.isControlDown()) {
+				if (e.getCode() == KeyCode.S && !menu.isSaveDisable()) {
+					save(primaryStage);
+				} else if (e.getCode() == KeyCode.O) {
+					open(primaryStage, null);
+				}
+			}
+		});
 		scene.setOnDragOver(e -> {
 			 if (e.getDragboard().hasFiles()) {
                  e.acceptTransferModes(TransferMode.COPY);
@@ -307,7 +321,7 @@ public class App extends Application {
 							
 							stepGuiChanges(currentTab, command);
 							LOG.debug("Use command {}", command);
-							command.useCommand();
+							command.useCommand(new Point2D(0, 0), new Dimension2D(0, 0), 1); //TODO
 
 						}
 						
@@ -376,6 +390,7 @@ public class App extends Application {
 		Platform.runLater(() -> {
 			currentTab.getCommands().getSelectionModel().clearSelection();
 			currentTab.getCommands().getSelectionModel().select(command);
+			if (menu.isScrollToUsing()) currentTab.getCommands().scrollTo(command);
 			status.setText("Running: " + command);
 		});
 	}

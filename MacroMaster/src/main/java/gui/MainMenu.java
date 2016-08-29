@@ -21,7 +21,8 @@ public class MainMenu extends MenuBar {
 	private MenuItem save = new MenuItem("Save");
 	private MenuItem saveAs = new MenuItem("Save as ...");
 	private MenuItem exit = new MenuItem("Exit");
-	private CheckMenuItem repeat = new CheckMenuItem("Repeat");
+	private CheckMenuItem repeat = new CheckMenuItem("Repeat macros");
+	private CheckMenuItem scrollTo = new CheckMenuItem("Scroll to running");
 	private MenuItem tutorial = new MenuItem("Tutorial");
 	private MenuItem hotkeys = new MenuItem("Hotkeys");
 	private MenuItem about = new MenuItem("About");
@@ -40,7 +41,8 @@ public class MainMenu extends MenuBar {
 					new SeparatorMenuItem(),
 					exit), 
 				new Menu("Options", null,
-					repeat), 
+					repeat,
+					scrollTo), 
 				new Menu("Help", null,
 						tutorial,
 						hotkeys,
@@ -85,11 +87,19 @@ public class MainMenu extends MenuBar {
 	public boolean isRepeat() {
 		return repeat.isSelected();
 	}
+	
+	public boolean isScrollToUsing() {
+		return scrollTo.isSelected();
+	}
 
 
 	public void setSaveDisable(boolean disable) {
 		save.setDisable(disable);
 		saveAs.setDisable(disable);
+	}
+
+	public boolean isSaveDisable() {
+		return save.isDisable() && saveAs.isDisable();
 	}
 
 }
