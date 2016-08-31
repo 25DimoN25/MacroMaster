@@ -3,7 +3,6 @@ package command;
 import org.testfx.robot.BaseRobot;
 import org.testfx.robot.impl.BaseRobotImpl;
 
-import javafx.geometry.Dimension2D;
 import javafx.geometry.Point2D;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
@@ -91,12 +90,14 @@ public class Command implements Cloneable {
 	 * @param speed multiply current delay. Default 1.0;
 	 * @throws InterruptedException
 	 */
-	public void useCommand(Point2D offset, Dimension2D scale, double speed) throws InterruptedException {
+	public void useCommand(int offsetX, int offsetY, double scaleWidth, 
+			double scaleHeight, double speed) throws InterruptedException {
+		
 		for (int i = 0; i < count; i++) {
 			if (coordinates != null) {
 				//make new point with offset and scale;
-				Point2D point = new Point2D(coordinates.getX() * scale.getWidth() + offset.getX(),
-						coordinates.getY() * scale.getHeight() + offset.getY());
+				Point2D point = new Point2D(coordinates.getX() * scaleWidth + offsetX,
+											coordinates.getY() * scaleHeight + offsetY);
 				
 				ROBOT.moveMouse(point);
 			}

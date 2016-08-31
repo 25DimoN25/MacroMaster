@@ -118,6 +118,7 @@ public class CommandList extends TableView<Command> {
 		});
 		getColumns().add(countColumn);
 		
+		
 		/*
 		 * Configuring 6th column for displaying and editing type of delay of command;
 		 */

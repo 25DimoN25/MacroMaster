@@ -15,6 +15,11 @@ import org.slf4j.LoggerFactory;
 import com.tulskiy.keymaster.common.Provider;
 
 import command.Command;
+import dialogs.AboutDialog;
+import dialogs.HotkeysDialog;
+import dialogs.SettingsDialog;
+import dialogs.SettingsDialog.Settings;
+import dialogs.TutorialDialog;
 import gui.CommandListTab;
 import gui.ControlBar;
 import gui.DropFileOverlay;
@@ -23,13 +28,8 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.geometry.Dimension2D;
 import javafx.geometry.Point2D;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.TabPane;
 import javafx.scene.image.Image;
@@ -47,7 +47,6 @@ import javafx.stage.Stage;
  * JavaFX Application.
  */
 public class App extends Application {
-	private static final String VER = "1.3.2-RELEASE";
 	private static final Logger LOG = LoggerFactory.getLogger(App.class);
 	
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -62,17 +61,13 @@ public class App extends Application {
 
 	private Provider provider; //Hotkey provider;
 	private Future<?> task; //Only for (stop) interrupt current macros; 
-
-	private Alert tutorialDialog;
-	private Alert hotkeysDialog;
-	private Alert aboutDialog;
 	
 	private FileChooser fileChooser;
 	
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		
+
 		/*
 		 * Register hotkeys;
 		 */
@@ -111,15 +106,18 @@ public class App extends Application {
 			executor.shutdown();
 			Platform.exit();
 		});
+		menu.setOnActionOthers(e -> {
+			SettingsDialog.getInstance(primaryStage).showAndWait();
+		});
 		menu.setOnActionTutorial(e -> {
-			tutorialDialog.show();
+			TutorialDialog.getInstance(primaryStage).show();
 		});
 		menu.setOnActionHotkeys(e -> {
-			hotkeysDialog.show();
+			HotkeysDialog.getInstance(primaryStage).show();
 		});
 		menu.setOnActionAbout(e -> {
 			java.awt.Toolkit.getDefaultToolkit().beep();
-			aboutDialog.show();
+			AboutDialog.getInstance(primaryStage).show();
 		});
 		menu.setOnActionSaveAs(e -> {
 			saveAs(primaryStage);				
@@ -147,69 +145,7 @@ public class App extends Application {
 		controls.setOnActionStop(e -> {
 			stopMacros();
 		});
-		
-		
-		/*
-		 * Tutorial dialog for menu;
-		 */
-		tutorialDialog = new Alert(AlertType.NONE);
-		tutorialDialog.setContentText(
-									  "New macros:\n"
-									+ "Click File -> New to create a new macros;\n\n"
-											  
-									+ "Add commands:\n"
-									+ "Configure table row, positioned highter \"Add command\" button, set the necessary parameters "
-									+ "and press Add button. You can combine any actions with mouse and keyboard in one command;\n\n"
-									
-									+ "Run macros:\n"
-									+ "You can run your macros in the current tab. Press play button;\n\n"
-									
-									+ "Pause macros:\n"
-									+ "You can edit your current macros at pause. Pause button stops macros only between commands "
-									+ "(i.e. its not working with #BIG_NUMBER#-counted commands);\n\n"
-									
-									+ "Stop macros:\n"
-									+ "You can add or remove commands only in stopped state. Stop button can interrupt macros "
-									+ "at any time;\n\n"
-									
-									+ "Editing:\n"
-									+ "You can move rows, change they position using mouse drag gesture. You can use default hotkeys "
-									+ "to delete selected rows (DELETE button), copy (CTRL+C), cut (CTRL+X) and paste (CTRL+V);\n\n"
-									
-									+ "Save/Open:\n"
-									+ "You can save your current macros in XML format, use File->Save. For open use File->Open or move "
-									+ "file on the MacroMaster from system explorer;");
-		tutorialDialog.setTitle("Tutorial");
-		tutorialDialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
-		
-		
-		/*
-		 * Hotkeys dialog for menu;
-		 */
-		hotkeysDialog = new Alert(AlertType.NONE);
-		hotkeysDialog.setContentText("CTRL + \tF9 - play macros\n"
-									+ "\t\tF10 - pause macros\n"
-									+ "\t\tF11 - stop macros\n"
-									+ "\t\tF12 - close programm");
-		hotkeysDialog.setTitle("Available hotkeys");
-		hotkeysDialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
-		
-		
-		/*
-		 * About dialog for menu;
-		 */
-		aboutDialog = new Alert(AlertType.INFORMATION);
-		Hyperlink link1 = new Hyperlink(null, new ImageView("img/github.png"));
-		link1.setOnAction(e -> {
-			getHostServices().showDocument("https://github.com/25DimoN25/MacroMaster");	
-		});
-		aboutDialog.setGraphic(link1);
-		aboutDialog.setHeaderText("MacroMaster - simple program to make simple macroses!");
-		aboutDialog.setContentText("Version " + VER + "\n\n"
-								 + "By Saltykov Dmitry, 2016 ©\n\n"
-								 + "Click to image and visit GitHub for more information.");
-		aboutDialog.setTitle("About");
-		
+
 		
 		/*
 		 * Open save dialog for menu;
@@ -243,10 +179,7 @@ public class App extends Application {
 		
 		DropFileOverlay overlay = new DropFileOverlay();
 		Scene scene = new Scene(new StackPane(rootPane, overlay), 600, 500);
-		/*
-		 * Hotkeys to open/save;
-		 */
-		scene.setOnKeyPressed(e -> {
+		scene.setOnKeyPressed(e -> {	//Hotkeys to open/save;
 			if (e.isControlDown()) {
 				if (e.getCode() == KeyCode.S && !menu.isSaveDisable()) {
 					save(primaryStage);
@@ -277,10 +210,6 @@ public class App extends Application {
 		primaryStage.getIcons().add(new Image("img/icon.png"));
 		primaryStage.show();
 		
-		tutorialDialog.initOwner(primaryStage);
-		hotkeysDialog.initOwner(primaryStage);
-		aboutDialog.initOwner(primaryStage);
-
 	}
 
 	
@@ -304,7 +233,8 @@ public class App extends Application {
 		if (controls.getState() == ControlBar.PAUSED) {
 			resumeMacros(currentTab);
 		} else {
-			task = executor.submit(() -> {	
+			task = executor.submit(() -> {
+				Settings settings = SettingsDialog.getSettings();
 				try {
 					LOG.debug("Start playing macros");
 					controls.setState(ControlBar.PLAYING);
@@ -321,7 +251,8 @@ public class App extends Application {
 							
 							stepGuiChanges(currentTab, command);
 							LOG.debug("Use command {}", command);
-							command.useCommand(new Point2D(0, 0), new Dimension2D(0, 0), 1); //TODO
+							command.useCommand(settings.getOffsetX(), settings.getOffsetY(), settings.getScalingX(),
+									settings.getScalingY(), settings.getSpeed());
 
 						}
 						

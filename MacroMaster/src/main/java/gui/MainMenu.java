@@ -23,12 +23,12 @@ public class MainMenu extends MenuBar {
 	private MenuItem exit = new MenuItem("Exit");
 	private CheckMenuItem repeat = new CheckMenuItem("Repeat macros");
 	private CheckMenuItem scrollTo = new CheckMenuItem("Scroll to running");
+	private MenuItem others = new MenuItem("Others");
 	private MenuItem tutorial = new MenuItem("Tutorial");
 	private MenuItem hotkeys = new MenuItem("Hotkeys");
 	private MenuItem about = new MenuItem("About");
 	
 	public MainMenu() {
-		
 
 		getMenus().addAll(
 				new Menu("File", null,
@@ -42,7 +42,9 @@ public class MainMenu extends MenuBar {
 					exit), 
 				new Menu("Options", null,
 					repeat,
-					scrollTo), 
+					scrollTo,
+					new SeparatorMenuItem(),
+					others), 
 				new Menu("Help", null,
 						tutorial,
 						hotkeys,
@@ -70,6 +72,10 @@ public class MainMenu extends MenuBar {
 
 	public void setOnActionExit(EventHandler<ActionEvent> value) {
 		exit.setOnAction(value);
+	}
+	
+	public void setOnActionOthers(EventHandler<ActionEvent> value) {
+		others.setOnAction(value);
 	}
 	
 	public void setOnActionTutorial(EventHandler<ActionEvent> value) {

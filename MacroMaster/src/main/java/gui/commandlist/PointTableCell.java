@@ -1,4 +1,6 @@
 package gui.commandlist;
+import java.util.function.UnaryOperator;
+
 import command.Command;
 import javafx.beans.binding.Bindings;
 import javafx.event.EventHandler;
@@ -8,6 +10,7 @@ import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
+import javafx.scene.control.TextFormatter.Change;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
@@ -28,13 +31,15 @@ public class PointTableCell extends TableCell<Command, Point2D> {
 	private static CoordinatesOverlay overlay = new CoordinatesOverlay();
 	
 	public PointTableCell() {
+		UnaryOperator<Change> coordFormatter = e -> e.getControlNewText().matches("\\d{0,5}") ? e : null; 
+		
 		fieldX = new TextField();
 		fieldX.setPromptText("x");
-		fieldX.setTextFormatter(new TextFormatter<>(e -> e.getControlNewText().matches("\\d{0,5}") ? e : null));
+		fieldX.setTextFormatter(new TextFormatter<>(coordFormatter));
 		
 		fieldY = new TextField();
 		fieldY.setPromptText("y");
-		fieldY.setTextFormatter(new TextFormatter<>(e -> e.getControlNewText().matches("\\d{0,5}") ? e : null));
+		fieldY.setTextFormatter(new TextFormatter<>(coordFormatter));
 
 		getCoordsButton = new Button("*");
 		getCoordsButton.setMaxWidth(25);
