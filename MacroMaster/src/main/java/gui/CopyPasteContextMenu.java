@@ -4,6 +4,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 
 /**
  * Context menu to copy/cut/paste operations.
@@ -13,20 +14,27 @@ import javafx.scene.control.MenuItem;
  */
 public class CopyPasteContextMenu extends ContextMenu {
 
+	private MenuItem edit = new MenuItem("Edit");
 	private MenuItem copy = new MenuItem("Copy");
 	private MenuItem cut = new MenuItem("Cut");
 	private MenuItem del = new MenuItem("Delete");
 	private MenuItem paste = new MenuItem("Paste");
 	
 	public CopyPasteContextMenu() {
+		edit.setDisable(true);
 		copy.setDisable(true);
 		cut.setDisable(true);
 		paste.setDisable(true);
 		del.setDisable(true);
 		
-		getItems().addAll(copy, cut, del, paste);
+		getItems().addAll(edit, new SeparatorMenuItem(), copy, cut, del, paste);
 	}
 		
+
+	public void setOnActionEdit(EventHandler<ActionEvent> value) {
+		edit.setOnAction(value);
+	}
+	
 	public void setOnActionCopy(EventHandler<ActionEvent> value) {
 		copy.setOnAction(value);
 	}
@@ -44,7 +52,8 @@ public class CopyPasteContextMenu extends ContextMenu {
 	}
 
 	
-	public void setCopyCutDisabled(boolean disabled) {
+	public void setCopyCutEditDelDisabled(boolean disabled) {
+		edit.setDisable(disabled);
 		copy.setDisable(disabled);
 		cut.setDisable(disabled);
 		del.setDisable(disabled);
@@ -53,5 +62,6 @@ public class CopyPasteContextMenu extends ContextMenu {
 	public void setPasteDisable(boolean disabled) {
 		paste.setDisable(disabled);
 	}
+
 	
 }

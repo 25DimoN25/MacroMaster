@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import command.Command;
 import command.CommandType;
+import dialogs.EditingDialog;
 import gui.commandlist.CommandList;
 import gui.commandlist.MoveableRow;
 import javafx.collections.FXCollections;
@@ -19,6 +20,7 @@ import javafx.scene.control.TableRow;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 /**
  * Tab implementation with list of commands, row with new command and button for add new command.
@@ -34,13 +36,14 @@ public class CommandListTab extends Tab {
 	private Button addCommand = new Button("add command");
 	private Command blankCommand = new Command(CommandType.CLICK, null, null, null, 1, 100);
 	private CopyPasteContextMenu contextMenu = new CopyPasteContextMenu();
-	
+	private Stage owner;
 	private File currentFile;
 	
 	private ObservableList<Command> cuttedCommands = FXCollections.observableArrayList();
 	
-	
-	public CommandListTab(String title) {
+	public CommandListTab(String title, Stage owner) {
+		this.owner = owner;
+		
 		VBox content = new VBox(3);
 		content.setAlignment(Pos.CENTER);
 		
@@ -58,7 +61,7 @@ public class CommandListTab extends Tab {
 			}
 		});
 		newCommand.getItems().add((Command) blankCommand);
-		newCommand.setRowFactory(table -> new TableRow<Command>() {
+		newCommand.setRowFactory(table -> new TableRow<Command>() { //Disable focus ability;
 			@Override
 			protected void updateItem(Command command, boolean empty) {
 				setFocusTraversable(false);
@@ -76,6 +79,7 @@ public class CommandListTab extends Tab {
 		contextMenu.setOnActionCut(e -> cut());
 		contextMenu.setOnActionDelete(e -> removeSelected());
 		contextMenu.setOnActionPaste(e -> paste());
+		contextMenu.setOnActionEdit(e -> editSelected());
 		commands.setContextMenu(contextMenu);
 		
 		content.getChildren().addAll(commands, newCommand, addCommand);
@@ -106,9 +110,9 @@ public class CommandListTab extends Tab {
 			@Override
 			public void onChanged(javafx.collections.ListChangeListener.Change<? extends Integer> c) {
 				if (c.getList().size() == 0) {
-					contextMenu.setCopyCutDisabled(true);
+					contextMenu.setCopyCutEditDelDisabled(true);
 				} else {
-					contextMenu.setCopyCutDisabled(false);
+					contextMenu.setCopyCutEditDelDisabled(false);
 				}
 			}
 		});
@@ -116,7 +120,17 @@ public class CommandListTab extends Tab {
 	
 	
 	/**
-	 * Copy selected commands;
+	 * Open edit dialog for selected commands.
+	 */
+	private void editSelected() {
+		EditingDialog.getInstance(owner).showEdit(
+				getCommands().getSelectionModel().getSelectedItems());
+		commands.refresh();
+	}
+
+
+	/**
+	 * Copy selected commands.
 	 */
 	private void copy() {
 		contextMenu.setPasteDisable(false);
@@ -129,7 +143,7 @@ public class CommandListTab extends Tab {
 	}
 	
 	/**
-	 * Copy and remove selected commands;
+	 * Copy and remove selected commands.
 	 */
 	private void cut() {
 		copy();
@@ -138,7 +152,7 @@ public class CommandListTab extends Tab {
 	
 	
 	/**
-	 * Paste copied commands after selected items;
+	 * Paste copied commands after selected items.
 	 */
 	private void paste() {
 		ObservableList<Command> selectedCommands = commands.getSelectionModel().getSelectedItems();
@@ -162,7 +176,7 @@ public class CommandListTab extends Tab {
 	
 	
 	/**
-	 * Delete selected commands;
+	 * Delete selected commands.
 	 */
 	private void removeSelected() {
 		ObservableList<Command> selectedCommands = FXCollections.observableArrayList(commands.getSelectionModel().getSelectedItems());

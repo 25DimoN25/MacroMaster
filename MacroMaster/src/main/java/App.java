@@ -96,7 +96,7 @@ public class App extends Application {
 		menu = new MainMenu();
 		menu.setSaveDisable(true);
 		menu.setOnActionNew(e -> {
-			CommandListTab tab = new CommandListTab("New macros " + newMacrosId);
+			CommandListTab tab = new CommandListTab("New macros " + newMacrosId, primaryStage);
 			commandListTabs.getTabs().add(tab);
 			newMacrosId++;
 		});
@@ -107,7 +107,7 @@ public class App extends Application {
 			Platform.exit();
 		});
 		menu.setOnActionOthers(e -> {
-			SettingsDialog.getInstance(primaryStage).showAndWait();
+			SettingsDialog.getInstance(primaryStage).show();
 		});
 		menu.setOnActionTutorial(e -> {
 			TutorialDialog.getInstance(primaryStage).show();
@@ -483,7 +483,7 @@ public class App extends Application {
 					fileName = fileName.replaceAll("\\.xmlm$", "");
 				}
 
-				CommandListTab newMacros = new CommandListTab(fileName);
+				CommandListTab newMacros = new CommandListTab(fileName, owner);
 				newMacros.setCurrentFile(selectedFile);
 				newMacros.getCommands().getItems().addAll(commands);
 				commandListTabs.getTabs().add(newMacros);
